@@ -11,3 +11,8 @@ dependencies = [
     "pandas>=2.3.2",
     "plotly-express>=0.4.1",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.12",
+]

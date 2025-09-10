@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import html
 
 class SettingsPage:
     def __init__(self, app):
