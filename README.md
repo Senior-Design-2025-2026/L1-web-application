@@ -20,17 +20,21 @@ We dont have to use uv, however it is <= 10x times faster than pip... and you do
    uv run app/app.py
    ```
 
+UV Documentation: https://docs.astral.sh/uv/
+
 ## Checking and Correcting Syntax with Ruff
 optional, but this is nice for cleaning imports and small formatting issues. uv is a far simpler alternative to pipx for tooling. Ruff has many common python code cleansers packaged and runs super fast.
 1. Install `ruff`:
    ```sh
-   pip install ruff
+   uv add --dev ruff # this is done
    ```
 2. Check for syntax issues:
    ```sh
-   ruff check .
+   uv run ruff check
    ```
 3. Automatically fix issues:
    ```sh
-   ruff check . --fix
+   uv ruff check --fix
    ```
+
+Ruff documentation: https://docs.astral.sh/ruff/
