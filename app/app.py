@@ -1,11 +1,16 @@
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 from flask import Flask
+import plotly.express as px
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
 
 server = Flask(__name__)
+
+maxSize = 300
+# temperatureData = [None] * maxSize
+temperatureData = [2,3,5,7,11,13,17]
 
 app = Dash(__name__, 
         server=server, 
@@ -27,7 +32,7 @@ navbar = dbc.NavbarSimple(
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     navbar,
-    html.Div(id='page-content')
+    html.Div(id='page-content'),
 ])
 
 # ----------------- APP ROUTING ----------------- #   
@@ -47,4 +52,4 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) #, host='0.0.0.0', port=8050)
