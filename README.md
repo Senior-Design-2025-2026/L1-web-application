@@ -5,7 +5,8 @@ Web server + gui for University of Iowa Senior Design Lab 1: Thermometer
 # Project Setup
 
 ## Setting up the Project
-We dont have to use uv, however it is <= 10x times faster than pip... and you dont need to set up venv. 'uv run' handles the environment setup for you.
+Using UV as package manager (<= 10x faster than pip! also handles venv)
+
 1. Ensure you have Python 3.12 or later installed.
 2. Install `uv` globally:
    ```sh
@@ -23,7 +24,8 @@ We dont have to use uv, however it is <= 10x times faster than pip... and you do
 UV Documentation: https://docs.astral.sh/uv/
 
 ## Checking and Correcting Syntax with Ruff
-optional, but this is nice for cleaning imports and small formatting issues. uv is a far simpler alternative to pipx for tooling. Ruff has many common python code cleansers packaged and runs super fast.
+Optional code quality check using Ruff 
+
 1. Install `ruff`:
    ```sh
    uv add --dev ruff # this is done
