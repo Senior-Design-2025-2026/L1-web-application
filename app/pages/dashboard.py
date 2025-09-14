@@ -1,74 +1,81 @@
 from dash import html, dcc, callback, Output, Input
-import plotly.express as px
-import pandas as pd
-import random
-import queue
+
+from components.dropdown_builder import dropdown_builder
+from components.flex_builder import flex_builder
+from components.TemperatureCard import TemperatureCard
 
 class DashboardPage:
     def __init__(self, app):
         self.app = app
+        self.tc1 = TemperatureCard(app, sensor_id=1)
+        self.tc2 = TemperatureCard(app, sensor_id=2)
 
-        self.temperatureData = queue.Queue()
-        self.maxSize = 301
-
-        for _ in range(self.maxSize):
-            self.temperatureData.put(None)
-
-        self.callbacks()
+        if app is not None:
+            self.callbacks()
 
     def layout(self) -> html.Div:
+        time_dropdown = dropdown_builder(
+            label="Time",
+            id="time-dropdown",
+            options=[
+                {'label': 'Seconds (s)', 'value': 's'},
+                {'label': 'Minutes (min)', 'value': 'min'},
+                {'label': 'Hours (hr)', 'value': 'hr'}
+            ],
+            value="s",
+        )
+
+        temp_dropdown = dropdown_builder(
+            label="Temperature",
+            id="temp-dropdown",
+            options=[
+                {'label': 'Farenheit (F°)', 'value': 'f'},
+                {'label': 'Celsius (C°)', 'value': 'c'},
+            ],
+            value="c",
+        )
+
+        dropdown_container = flex_builder(
+            direction="row",
+            children=[temp_dropdown, time_dropdown],
+            size="md",
+            reversed=False
+        )
+
+        temp_card_1 = html.Div(
+            id="temp-card-1"
+        )
+
+        temp_card_2 = html.Div(
+            id="temp-card-2"
+        )
+
+        temp_cards = flex_builder(
+            direction="row",
+            children=[
+                temp_card_1,
+                temp_card_2
+            ]
+        )
+
         return html.Div([
-            html.H1("Dashboard Page"),
-            
-            # dropdown example 
-            # the way this works is by listening to a change value of id 'dropdown'
-            # see callback below...
-            dcc.Dropdown(
-                id='dropdown',
-                options=[
-                    {'label': 'Option 1', 'value': 'option1'},
-                    {'label': 'Option 2', 'value': 'option2'},
-                    {'label': 'Option 3', 'value': 'option3'}
-                ],
-                value='option1',
-                placeholder="Select an option"
-            ),
-
-            # stores the output from the callback (current dropdown val)
-            html.Div(id='output', style={'marginTop': '20px'}), 
-
-            dcc.Graph(id="graph"),
-
-            dcc.Interval(
-                id='interval-component',
-                interval=1*1000,  # 1 second (1000 milliseconds)
-                n_intervals=0
-            )
+            dropdown_container, temp_cards
         ])
     
     def callbacks(self):
         @callback(
-            Output('output', 'children'),
-            Input('dropdown', 'value')
+            Output("temp-card-1", "children"),
+            Input("time-dropdown", "value"),
         )
-        def update_output(value):
-            return f"You have selected: {value}"
-        
+        def time_selection(time):
+            self.tc1.turn_off()
+            return self.tc1.render()
+
         @callback(
-            Output("graph", "figure"),
-            Input("interval-component", "n_intervals"))
-        def update_line_chart(dropdown_value):
-            self.temperatureData.put(random.uniform(10,50))
-
-            if self.temperatureData.qsize() > self.maxSize:
-                self.temperatureData.get()
-
-            temperatureData = pd.DataFrame({
-                "seconds ago": list(range(self.maxSize)),
-                "temperature": reversed(list(self.temperatureData.queue))
-            })
-
-            fig = px.line(temperatureData,
-                x="seconds ago", y="temperature")
-            fig.update_xaxes(autorange="reversed")
-            return fig
+            Output("temp-card-2", "children"),
+            Input("temp-dropdown", "value"),
+        )
+        def temp_selection(temp):
+            self.tc2.turn_on()
+            self.tc2.update({"temp": "20"})
+            return self.tc2.render()
