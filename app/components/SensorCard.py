@@ -100,7 +100,7 @@ class SensorCard:
             Output(f"btn-sensor-{self._sensor_id}-toast", "is_open"),
             Input(f"btn-sensor-{self._sensor_id}", "n_clicks"),
         )
-        def render(n):
+        def toggle_sensor(n):
             if n == 0:
                 # method to get the current status from redis
                 # for now set on

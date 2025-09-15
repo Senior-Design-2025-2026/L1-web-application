@@ -174,7 +174,7 @@ def textbox_builder(label: str, id: str, value: str = "", placeholder: str = "")
             }
         )
 
-def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary", toast_message: Union[str, html.Div] = "empty message :(", duration_ms: int = 3000, position: str = "top"):
+def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary", toast_message: Union[str, html.Div] = "empty message :(", duration_ms: int = 3000, position: str = "top", disabled: bool = False):
     """
     Creates a button that triggers a toast notification.
 
@@ -185,12 +185,15 @@ def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary"
         toast_message (str): Message displayed in the toast. Defaults to "empty message :(".
         duration_ms (int): Duration the toast is visible in milliseconds. Defaults to 3000.
         position (str): Position of the toast. Defaults to "top".
+        disabled (bool): ability of the button to recognize a click.
 
     Returns:
         html.Div: A Div containing the button and toast components.
     """
     btn_id = id
     toast_id = id + "-toast"
+
+    print(toast_id)
     btn = html.Div([
         dbc.Button(
             label,
@@ -198,6 +201,7 @@ def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary"
             color=color,
             n_clicks=0,
             outline=True,
+            disabled=disabled
         ),
         dbc.Toast(
             toast_message,
