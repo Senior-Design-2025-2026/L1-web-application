@@ -31,18 +31,13 @@ class UserConfig:
             id=f"save-user-config-{self.id}",
             label="Save",
             disabled=True,
-            toast_message=html.Div([
-                html.Div(f"saving config for user: {self.id}"),
-                html.Div(self.config)
-            ], style={
-                "display": "flex",
-                  "flexDirection": "column"
-                  }
-            ),
+            toast_message="saving",
             duration_ms=2000
         )
         row.append(btn)
         self.config_row = row
+
+        print("--- self.config_row", self.config_row)
 
     def _layout(self):
         return html.Div(

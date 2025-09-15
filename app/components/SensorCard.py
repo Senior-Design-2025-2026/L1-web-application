@@ -99,8 +99,13 @@ class SensorCard:
             Output(f"btn-sensor-{self._sensor_id}-text", "children"),
             Output(f"btn-sensor-{self._sensor_id}-toast", "is_open"),
             Input(f"btn-sensor-{self._sensor_id}", "n_clicks"),
+            Input("time-dropdown", "value"),
+            Input("temp-dropdown", "value"),
         )
-        def toggle_sensor(n):
+        def toggle_sensor(n, time_u, temp_u):
+            # change unit
+            self.set_unit(temp_u)
+
             if n == 0:
                 # method to get the current status from redis
                 # for now set on

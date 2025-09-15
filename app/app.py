@@ -28,9 +28,6 @@ navbar = dbc.NavbarSimple(
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    dcc.Store(id="selections"),                                              # using to store client session selections
-    
-    # actual html part
     navbar,
     html.Div(id='page-content'),
 ])

@@ -1,6 +1,6 @@
 from dash import html
 
-from components.builders import flex_builder
+from components.builders import flex_builder, toasty_button
 from components.UserConfig import UserConfig
 
 def _walk_ids(component, path="root", found=None):
@@ -37,19 +37,10 @@ class SettingsPage:
         for user in users:
             user_config = UserConfig(self.app, user)
             user_config.create()
-            self.user_configs.append(user_config.render())
+            div = user_config.render()
+            self.user_configs.append(div)
 
         test = html.Div("test", id="TESTING")
-
-        print("++++++++++ ITEMS ++++++++++")
-        for output, meta in self.app.callback_map.items():
-            print("Output target:", output)
-            print("Inputs:", [i["id"] for i in meta["inputs"]])
-            print("State:", [s["id"] for s in meta["state"]])
-
-        print("++++++++++ LAYOUT IDS (SettingsPage) ++++++++++")
-        for path, comp_type, cid in _walk_ids(self):
-            print(f"{path} :: {comp_type} :: id={cid}")
 
         layout = flex_builder(
             direction="column",

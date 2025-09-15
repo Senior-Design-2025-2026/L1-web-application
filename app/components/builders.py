@@ -106,6 +106,9 @@ def dropdown_builder(label: str, id: str, options: List[Dict], clearable: Union[
         options=options,
         value=value if value is not None else options[0].get("value") if options else None,
         clearable=clearable,
+        searchable=False,
+        persistence=True,
+        persistence_type="session",
         style={
             "color": "#666666",
             "font-weight": "normal",

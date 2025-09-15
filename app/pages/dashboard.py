@@ -77,27 +77,26 @@ class DashboardPage:
     
     def callbacks(self):
         @callback(
-            Output("selections", "data"),
-            Input("time-dropdown", "value"),
-            Input("temp-dropdown", "value"),
+            Input("selections", "data")
         )
-        def update_selections(time_val: str, temp_val: str):
-            return {
-                "time": time_val,
-                "temp": temp_val,
+        def update_selections(time_unit: str, temp_unit: str, data):
+            selections = {
+                "time": time_unit,
+                "temp": temp_unit,
             }
+
+            return selections, time_unit, temp_unit
 
         @callback(
             # visuals
             Output("line-chart", "children"),
-            Input("selections", "data")
+            Input("time-dropdown", "value"),
+            Input("temp-dropdown", "value"),
         )
-        def update_visuals(selections):
-            time_unit = selections.get("time")
-            temp_unit = selections.get("temp")
+        def update_visuals(time_u, temp_u):
 
             # TODO get the global df from redis
-            line_chart = create_chart(df=None, time_unit=time_unit, temp_unit=temp_unit)
+            line_chart = create_chart(df=None, time_unit=time_u, temp_unit=temp_u)
             # todo, other charts: time, min, max, avg
 
             return line_chart
