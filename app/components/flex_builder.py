@@ -5,7 +5,7 @@ from typing import Optional, Union, List, Dict
 def flex_builder(
     direction: str = "row",
     children: List[html.Div] = None,
-    reversed: bool = False,
+    reversed: Union[str, str] = "",
     bordered: bool = False,
     size: str = "md",
     justification: Optional[str] = None,
@@ -31,7 +31,7 @@ def flex_builder(
     Raises:
         ValueError: If direction or size is not valid.
     """
-    if direction not in ["row", "col"]:
+    if direction not in ["row", "column"]:
         raise ValueError("invalid direction; available directions are ['row', 'col']")
 
     size_map = {

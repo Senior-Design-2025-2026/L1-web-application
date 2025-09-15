@@ -49,7 +49,7 @@ class TemperatureCard():
 
     def render(self) -> html.Div:
         label = html.Div(
-            self._sensor_id,
+            f"Sensor: {self._sensor_id}",
             style={
                 "color": "#454545",
                 "font-weight": "bold"
@@ -58,10 +58,10 @@ class TemperatureCard():
 
         active_indicator = html.Div(
             style={
-                "width": "4px",
-                "height": "4px",
+                "width": "12px",
+                "height": "12px",
                 "border-radius": "20px",
-                "background-color": "green" if self._active else "#666666"
+                "background-color": "green" if self._active else "red"
             }
         )
 
@@ -88,15 +88,19 @@ class TemperatureCard():
             color="success"
         )
 
-        return flex_builder(
-            direction="row",
+        card = flex_builder(
+            direction="column",
             bordered=True,
             children=[
                 header,
                 reading,
                 toggle_button,
-            ]
+            ],
+            justification="space-between",
+            alignment="center"
         )
+         
+        return card
 
     def callbacks(self):
         @callback(
@@ -111,10 +115,12 @@ class TemperatureCard():
             if n_clicks and self._active:
                 self.turn_off()
                 text = "Turn On"
-                color = "success"
+                # color = "success"
             else:
                 self.turn_on()
                 text = "Turn Off"
-                color = "danger"
+                # color = "danger"
+
+            color = "secondary"
 
             return self.render(), text, color 
