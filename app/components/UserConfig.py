@@ -1,4 +1,4 @@
-from dash import html, callback, Output, Input, State
+from dash import html, callback, Output, Input
 from components.builders import flex_builder, textbox_builder, toasty_button
 
 class UserConfig:

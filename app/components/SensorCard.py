@@ -1,4 +1,4 @@
-from dash import html, callback, Output, Input, no_update
+from dash import html, callback, Output, Input
 
 from components.builders import flex_builder, toasty_button
 
