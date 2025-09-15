@@ -10,6 +10,8 @@ dependencies = [
     "dash-core-components>=2.0.0",
     "pandas>=2.3.2",
     "plotly-express>=0.4.1",
+    "pydantic>=2.11.9",
+    "sqlalchemy>=2.0.43",
 ]
 
 [dependency-groups]
