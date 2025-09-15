@@ -1,7 +1,7 @@
 from dash import html, callback, Output, Input
 import dash_bootstrap_components as dbc
 
-from components.builders import flex_builder
+from components.builders import flex_builder, toasty_button
 
 class TemperatureCard:
     def __init__(self, app, sensor_id: int):
@@ -26,7 +26,6 @@ class TemperatureCard:
         return self._temperature
 
     def update(self, message: dict):
-
         # todo, push to database
         self._temperature = message.get("temp")
 
@@ -64,11 +63,13 @@ class TemperatureCard:
             }
         )
 
-        toggle_button = dbc.Button(
-            html.Div(id=f"btn-text-{self._sensor_id}"),
-            id=f"toggle-button-{self._sensor_id}",
-            outline=True,
-            color="success"
+        id = f"btn-sensor-{self._sensor_id}"
+        toggle_button = toasty_button(
+            id=id,
+            label=html.Div(
+                id=(id+"-text")
+            ),
+            toast_message=f"toggling sensor {self._sensor_id}"
         )
 
         return html.Div(
@@ -88,26 +89,21 @@ class TemperatureCard:
                 "height":"100%"
             }
         )
-         
 
     def callbacks(self):
         @callback(
-            Output(f"temp-card-{self._sensor_id}", "children", allow_duplicate=True),
-            Output(f"btn-text-{self._sensor_id}", "children"),
-            Output(f"toggle-button-{self._sensor_id}", "color"),
-            Input(f"toggle-button-{self._sensor_id}", "n_clicks"),
+            Output(f"btn-sensor-{self._sensor_id}", "children", allow_duplicate=True),
+            Output(f"btn-sensor-{self._sensor_id}-text", "children"),
+            Input(f"btn-sensor-{self._sensor_id}", "n_clicks"),
             prevent_initial_call=True
         )
         def toggle_active(n_clicks):
+            print("TESTTEST")
             if n_clicks and self._active:
                 self.turn_off()
                 text = "Turn On"
-                # color = "success"
             else:
                 self.turn_on()
                 text = "Turn Off"
-                # color = "danger"
 
-            color = "secondary"
-
-            return self.render(), text, color 
+            return self.render(), text

@@ -1,4 +1,5 @@
 from dash import html, dcc
+import dash_bootstrap_components as dbc
 from typing import Union, List, Dict
 
 from dash import html
@@ -173,3 +174,41 @@ def textbox_builder(label: str, id: str, value: str = "", placeholder: str = "")
             "width":"100%"
             }
         )
+
+def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary", toast_message: str = "empty message :(", duration_ms: int = 3000, position: str = "top"):
+    """
+    Creates a button that triggers a toast notification.
+
+    Args:
+        id (str): Unique identifier for the button and toast.
+        label (Union[str, html.Div]): Label for the button. Can be a string or an HTML Div.
+        color (str): Color of the button. Defaults to "secondary".
+        toast_message (str): Message displayed in the toast. Defaults to "empty message :(".
+        duration_ms (int): Duration the toast is visible in milliseconds. Defaults to 3000.
+        position (str): Position of the toast. Defaults to "top".
+
+    Returns:
+        html.Div: A Div containing the button and toast components.
+    """
+    btn = html.Div([
+        dbc.Button(
+            label,
+            id=id,
+            color=color,
+            n_clicks=0,
+        ),
+        dbc.Toast(
+            toast_message,
+            id=(id+"-toast"),
+            header=f"Notification {id}",
+            is_open=False,
+            duration=duration_ms,
+            dismissable=True,
+            style={
+                "position": "absolute",
+                position: 0
+            },
+        )
+    ])
+
+    return btn

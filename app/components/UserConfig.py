@@ -38,10 +38,7 @@ class UserConfig:
             )
 
     def callbacks(self):
-        @callback(
-            Output("")
-        )
-
+        ...
         
 
         
