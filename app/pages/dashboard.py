@@ -3,7 +3,7 @@ from dash import html, dcc, callback, Output, Input
 from components.dropdown_builder import dropdown_builder
 from components.flex_builder import flex_builder
 from components.TemperatureCard import TemperatureCard
-from utils.temperature_chart import create_chart
+from visuals.temperature_chart import create_chart
 
 class DashboardPage:
     def __init__(self, app):
@@ -60,7 +60,7 @@ class DashboardPage:
             justification="center",
         )
 
-        readings_chart = html.Div(id="chart")
+        readings_chart = html.Div(id="line-chart")
 
         return flex_builder(
             direction="column",
@@ -73,21 +73,34 @@ class DashboardPage:
     
     def callbacks(self):
         @callback(
-            Output("temp-card-1", "children"),
-            Output("chart", "children", allow_duplicate=True),
+            Output("selections", "data"),
             Input("time-dropdown", "value"),
-            prevent_initial_call=True
-        )
-        def time_selection(time):
-            self.tc1.turn_on()
-            return self.tc1.render(), create_chart(df = None)
-
-        @callback(
-            Output("temp-card-2", "children"),
-            Output("chart", "children"),
             Input("temp-dropdown", "value"),
         )
-        def temp_selection(temp):
-            self.tc2.turn_on()
-            self.tc2.update({"temp": "20"})
-            return self.tc2.render(), create_chart(df = None)
+        def update_selections(time_val: str, temp_val: str):
+            return {
+                "time": time_val,
+                "temp": temp_val,
+            }
+
+        @callback(
+            # cards
+            Output("temp-card-1", "children"),
+            Output("temp-card-2", "children"),
+            
+            # visuals
+            Output("line-chart", "children"),
+            Input("selections", "data")
+        )
+        def update_visuals(selections):
+            time_unit = selections.get("time")
+            temp_unit = selections.get("temp")
+            
+            for card in [self.tc1, self.tc2]:
+                card.set_unit(time_unit)
+            
+            # TODO get the global df from redis
+            line_chart = create_chart(df=None, time_unit=time_unit, temp_unit=temp_unit)
+            # todo, other charts: time, min, max, avg
+
+            return self.tc1.render(), self.tc2.render(), line_chart

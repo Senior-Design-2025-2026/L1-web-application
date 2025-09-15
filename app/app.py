@@ -54,7 +54,7 @@ navbar = dbc.NavbarSimple(
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    dcc.Store(id="store"),                                              # using to store client session selections; NOT using to store df as this is streamed
+    dcc.Store(id="selections"),                                              # using to store client session selections
     
     # actual html part
     navbar,

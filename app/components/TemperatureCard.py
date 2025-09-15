@@ -13,21 +13,8 @@ class TemperatureCard():
         if app is not None:
             self.callbacks()
 
-    def set_fahrenheit(self):
-        """
-        Converts the temperature to Fahrenheit if currently in Celsius.
-        """
-        if self._unit != "f" and self._temperature is not None:
-            self._temperature = (self._temperature * 9/5) + 32
-            self._unit = "f"
-
-    def set_celsius(self):
-        """
-        Converts the temperature to Celsius if currently in Fahrenheit.
-        """
-        if self._unit != "c" and self._temperature is not None:
-            self._temperature = (self._temperature - 32) * 5/9
-            self._unit = "c"
+    def set_unit(self, unit: str):
+        self._unit = unit
 
     def turn_on(self):
         self._active = True
