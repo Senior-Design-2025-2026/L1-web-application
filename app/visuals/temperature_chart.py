@@ -4,7 +4,6 @@ import pandas as pd
 
  
 def plot_sensor_trace(fig: go.Figure, df: pd.DataFrame, id: int, line: dict):
-    print("PLOT SENSOR")
     sensor_df = df[df["id"] == 1]
     fig.add_trace(
         go.Scatter(
@@ -32,8 +31,6 @@ def create_chart(
     Returns:
         go.Figure: Plotly figure object for the temperature readings.
     """
-    print("CREATING CHART")
-    
     # TODO REMOVE
     df = pd.DataFrame({
         "id": [1]*10 + [2]*10,

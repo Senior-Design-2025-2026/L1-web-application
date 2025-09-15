@@ -39,6 +39,8 @@ To achieve performance and persistence, we employ the following architecture:
 **Purpose:** Long-term, reliable data storage  
 **Persisted:**
 - Streaming data (written by the embedded program)
+- temperature_readings: read-only
+- user: R/W
 
 ---
 

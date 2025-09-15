@@ -1,7 +1,6 @@
 from dash import html, callback, Output, Input
 
-from components.dropdown_builder import dropdown_builder
-from components.flex_builder import flex_builder
+from components.builders import flex_builder, dropdown_builder, textbox_builder
 from components.TemperatureCard import TemperatureCard
 from visuals.temperature_chart import create_chart
 
@@ -50,14 +49,20 @@ class DashboardPage:
             id="temp-card-2"
         )
 
-        temp_cards = flex_builder(
-            direction="row",
-            children=[
-                temp_card_1,
-                temp_card_2
-            ],
-            alignment="center",
-            justification="center",
+        temp_cards = html.Div(
+            flex_builder(
+                direction="row",
+                children=[
+                    temp_card_1,
+                    temp_card_2
+                ],
+                alignment="center",
+                justification="center",
+            ),
+            style={
+                "width":"100%",
+                "height":"100%",
+            }
         )
 
         readings_chart = html.Div(id="line-chart")

@@ -4,6 +4,7 @@ from flask import Flask
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
+# from db_conn.db_methods import DBConnection
 
 server = Flask(__name__)
 
@@ -34,10 +35,16 @@ app.layout = html.Div([
     html.Div(id='page-content'),
 ])
 
-# ----------------- APP ROUTING ----------------- #   
+
+# ---------------- DB CONNECTION ---------------- #
+db_path = "app/db_conn/Lab1.db"
+# db_conn = DBConnection(db_path=db_path)
+
+# ------------------ APP PAGES ------------------ #   
 dashboard_page_obj = DashboardPage(app)
 settings_page_obj  = SettingsPage(app)
 
+# ----------------- APP ROUTING ----------------- #   
 @app.callback(
     Output('page-content', 'children'),
     Input('url', 'pathname')

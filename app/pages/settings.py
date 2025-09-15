@@ -1,41 +1,39 @@
-from dash import html
+from dash import html, callback, Output, Input, State
+import pandas as pd
+
+from components.builders import flex_builder, textbox_builder
+from components.UserConfig import UserConfig
 
 class SettingsPage:
     def __init__(self, app):
         self.app = app
 
+        if app is not None:
+            self.callbacks()
+
+    def get_dummy_users(self):
+        # dummy user data for testing (AI gen-ed)
+        users = [
+            {"id": 1, "name": "Alice", "phone_num": "1234567890", "email_addr": "alice@example.com"},
+            {"id": 2, "name": "Bob", "phone_num": "0987654321", "email_addr": "bob@example.com"},
+        ]
+        return users
+
     def layout(self) -> html.Div:
+        users = self.get_dummy_users()
+        user_configs = []
 
-        # here is an example of defining a html block and placing it within wanted dom position
-        shitcoin = html.Div("MESSAGING SERVICE CONFIG")
+        for user in users:
+            print("user:", user)
+            user_config = UserConfig(self.app, user)
+            user_configs.append(user_config.render())
 
-        return html.Div(
-            children=[
-                html.Div(
-                    "Settings page could contain some of the following",
-                    style={
-                        "font-weight":"bold"
-                    }
-                ),
-
-                # using the predefined component
-                shitcoin,
-
-                html.Div(
-                    "1. sms config"
-                ),
-                html.Div(
-                    "2. sftp config"
-                ),
-
-                html.Div("OTHER CAPABILITIES"),
-                html.Div("if we can nail the IPC between the embedded code and the web server, we should be able to easily change the data rate (assuming that the 1hz bound is per najeeb and not the temperature sensor)")
-            ],
-            # here is an example of inline css, however plotly dih lets you use .css file. This is super similar to inline html. 
-            # THIS APPLIES TO THE PARENT DIV (because it is on the same level as the 'children' container)
-            style={
-                "display":"flex",
-                "flex-direction":"column",
-                "padding":"16px"
-            }
+        return flex_builder(
+            direction="column",
+            children=user_configs,
+            alignment="start",
+            justification="start"
         )
+    
+    def callbacks(self):
+        ...

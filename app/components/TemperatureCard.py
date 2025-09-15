@@ -1,9 +1,9 @@
 from dash import html, callback, Output, Input
 import dash_bootstrap_components as dbc
 
-from components.flex_builder import flex_builder
+from components.builders import flex_builder
 
-class TemperatureCard():
+class TemperatureCard:
     def __init__(self, app, sensor_id: int):
         self._sensor_id = sensor_id
         self._active = True
@@ -71,19 +71,24 @@ class TemperatureCard():
             color="success"
         )
 
-        card = flex_builder(
-            direction="column",
-            bordered=True,
-            children=[
-                header,
-                reading,
-                toggle_button,
-            ],
-            justification="space-between",
-            alignment="center"
+        return html.Div(
+            flex_builder(
+                direction="column",
+                bordered=True,
+                children=[
+                    header,
+                    reading,
+                    toggle_button,
+                ],
+                justification="space-between",
+                alignment="center"
+            ),
+            style={
+                "width":"100%", 
+                "height":"100%"
+            }
         )
          
-        return card
 
     def callbacks(self):
         @callback(
