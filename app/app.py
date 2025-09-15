@@ -6,32 +6,6 @@ import plotly.express as px
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
 
-################### DATA SHARING AND STORAGE ####################
-# Dash is session based per client which makes viewing and 
-# modifying the system between multiple uses troublesome
-
-# We want the status and stream of data to be identical across 
-# clients. For example, if client 'a' turns sensor 1 on, then 
-# this is reflected within client 'b's view
-
-# For performance and persistence, we employ the following items
-
-# 1. GLOBAL: Redis 
-# --- what is stored globally?
-# - sensor 1 status
-# - sensor 2 status
-# - streaming data 
-
-# 2. SESSION: dcc.Store (client side browser cache)
-# --- what is being cached locally?
-# - temperature selection
-# - timeframe selection
-
-# 3. DATABASE: Sqlite
-# --- what data is persisting?
-# - streaming data (write through by the embedded program...)
-################################################################
-
 server = Flask(__name__)
 
 app = Dash(__name__, 
