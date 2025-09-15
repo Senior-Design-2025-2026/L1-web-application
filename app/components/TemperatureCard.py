@@ -30,19 +30,15 @@ class TemperatureCard():
             self._unit = "c"
 
     def turn_on(self):
-        print(f"> {self._sensor_id}: {self._active}")
         self._active = True
 
     def turn_off(self):
-        print(f"> {self._sensor_id}: {self._active}")
         self._active = False
 
     def get_temp(self):
         return self._temperature
 
     def update(self, message: dict):
-        print(f"UPDATING TEMPERATURE FOR SENSOR {self._sensor_id}")
-        print(f"current: {self._temperature}\nnew: {message.get("temp")}")
 
         # todo, push to database
         self._temperature = message.get("temp")
@@ -111,7 +107,6 @@ class TemperatureCard():
             prevent_initial_call=True
         )
         def toggle_active(n_clicks):
-            print(f"TemperatureCard.toggle_active():\n\tsensor: {self._sensor_id}\n\tcurrent: {self._active}\n\tclicks: {n_clicks}")
             if n_clicks and self._active:
                 self.turn_off()
                 text = "Turn On"

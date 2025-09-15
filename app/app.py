@@ -11,7 +11,8 @@ server = Flask(__name__)
 app = Dash(__name__, 
         server=server, 
         suppress_callback_exceptions=True, 
-        external_stylesheets=[dbc.themes.BOOTSTRAP]
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        prevent_initial_callbacks="initial_duplicate"
         )
 
 navbar = dbc.NavbarSimple(

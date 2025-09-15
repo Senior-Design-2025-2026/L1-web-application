@@ -5,11 +5,11 @@ from typing import Optional, Union, List, Dict
 def flex_builder(
     direction: str = "row",
     children: List[html.Div] = None,
-    reversed: Union[str, str] = "",
     bordered: bool = False,
     size: str = "md",
     justification: Optional[str] = None,
-    alignment: Optional[str] = None
+    alignment: Optional[str] = None,
+    fill: bool = True
 ) -> html.Div:
     """
     Creates a styled Dash container (Div) with configurable direction, size, justification, alignment, and child elements.
@@ -18,12 +18,12 @@ def flex_builder(
         direction (str): Flex direction, either 'row' or 'col'.
         children (List[html.Div]): List of Dash HTML Div children to include in the container.
         size (str): Size keyword for both padding and gap (e.g., 'xl', 'lg', 'md', 'sm', 'xs').
-        reversed (bool): If True, reverses the flex direction.
         bordered (bool): If True, container contains a light border. Defaults to False (no border).
         justification (str, optional): Flexbox justification (e.g., 'flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly').
             Controls alignment along the main axis (the direction of the flex: 'row' = horizontal, 'col' = vertical). Defaults to None.
         alignment (str, optional): Flexbox alignment (e.g., 'stretch', 'center', 'flex-start', 'flex-end', 'baseline').
             Controls alignment along the cross axis (perpendicular to the flex direction: 'row' = vertical, 'col' = horizontal). Defaults to None.
+        fill (bool): fully stretch along main axis
 
     Returns:
         html.Div: A Dash HTML Div styled as a flex container with the specified properties.
@@ -66,6 +66,10 @@ def flex_builder(
         style["justify-content"] = justification
     if alignment:
         style["align-items"] = alignment
+    if direction == "row" and fill:
+        style["width"] = "100%"
+    if direction == "col" and fill:
+        style["height"] = "100%"
 
     return html.Div(
         children,
