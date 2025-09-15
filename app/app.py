@@ -1,7 +1,6 @@
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 from flask import Flask
-import plotly.express as px
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage

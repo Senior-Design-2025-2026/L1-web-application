@@ -1,6 +1,6 @@
 
-from dash import html, dcc, callback, Output, Input
-from typing import Optional, Union, List, Dict
+from dash import html, dcc
+from typing import Union, List, Dict
 
 def dropdown_builder(label: str, id: str, options: List[Dict], clearable: Union[bool, None] = False, value: Union[str, list, None] = None) -> html.Div:
     """

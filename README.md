@@ -1,7 +1,19 @@
 # L1-web-server
 Plotly Dash Web-Server Responsible for displaying the temperature readings visually.
 
-![alt text](image.png)
+<div align="center">
+
+![alt text](img/project_diagram.png)
+<br>
+<span style="display:block; text-align:center; font-style:italic;">Project Diagram</span>
+</div>
+
+<div align="center">
+
+![alt text](img/sqlite_schemas.png)
+<br>
+<span style="display:block; text-align:center; font-style:italic;">Sqlite Schemas</span>
+</div>
 
 ## Data Sharing and Storage
 
