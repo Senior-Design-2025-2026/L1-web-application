@@ -1,7 +1,6 @@
-from dash import html, callback, Output, Input
-import dash_bootstrap_components as dbc
+from dash import html
 
-from components.builders import flex_builder, textbox_builder, dropdown_builder
+from components.builders import flex_builder, textbox_builder
 
 class UserConfig:
     def __init__(self, app, config: dict):

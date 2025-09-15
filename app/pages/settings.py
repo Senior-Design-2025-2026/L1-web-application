@@ -1,7 +1,6 @@
-from dash import html, callback, Output, Input, State
-import pandas as pd
+from dash import html
 
-from components.builders import flex_builder, textbox_builder
+from components.builders import flex_builder
 from components.UserConfig import UserConfig
 
 class SettingsPage:

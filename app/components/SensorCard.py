@@ -1,9 +1,8 @@
-from dash import html, callback, Output, Input
-import dash_bootstrap_components as dbc
+from dash import html, callback, Output, Input, no_update
 
 from components.builders import flex_builder, toasty_button
 
-class TemperatureCard:
+class SensorCard:
     def __init__(self, app, sensor_id: int):
         self._sensor_id = sensor_id
         self._active = True
@@ -29,7 +28,20 @@ class TemperatureCard:
         # todo, push to database
         self._temperature = message.get("temp")
 
-    def render(self) -> html.Div:
+    def create(self):
+        btn_id = f"btn-sensor-{self._sensor_id}"
+        text_id = btn_id + "-text"
+        self.btn = toasty_button(
+            id=btn_id,
+            label=html.Div(id=text_id),
+            toast_message=f"toggling sensor {self._sensor_id}",
+            duration_ms=2000
+        )
+    
+    def render(self):
+        return html.Div(self.btn, id=f"temp-card-{self._sensor_id}")
+
+    def _layout(self):
         label = html.Div(
             f"Sensor: {self._sensor_id}",
             style={
@@ -63,15 +75,6 @@ class TemperatureCard:
             }
         )
 
-        id = f"btn-sensor-{self._sensor_id}"
-        toggle_button = toasty_button(
-            id=id,
-            label=html.Div(
-                id=(id+"-text")
-            ),
-            toast_message=f"toggling sensor {self._sensor_id}"
-        )
-
         return html.Div(
             flex_builder(
                 direction="column",
@@ -79,7 +82,7 @@ class TemperatureCard:
                 children=[
                     header,
                     reading,
-                    toggle_button,
+                    self.btn,
                 ],
                 justification="space-between",
                 alignment="center"
@@ -92,18 +95,19 @@ class TemperatureCard:
 
     def callbacks(self):
         @callback(
-            Output(f"btn-sensor-{self._sensor_id}", "children", allow_duplicate=True),
+            Output(f"temp-card-{self._sensor_id}", "children"),
             Output(f"btn-sensor-{self._sensor_id}-text", "children"),
+            Output(f"btn-sensor-{self._sensor_id}-toast", "is_open"),
             Input(f"btn-sensor-{self._sensor_id}", "n_clicks"),
-            prevent_initial_call=True
         )
-        def toggle_active(n_clicks):
-            print("TESTTEST")
-            if n_clicks and self._active:
+        def render(n):
+            if n == 0:
+                # method to get the current status from redis
+                # for now set on
+                return self._layout(), "Turn Off", False
+            elif n and self._active:
                 self.turn_off()
-                text = "Turn On"
-            else:
+                return self._layout(), "Turn On", True
+            elif n and not self._active:
                 self.turn_on()
-                text = "Turn Off"
-
-            return self.render(), text
+                return self._layout(), "Turn Off", True

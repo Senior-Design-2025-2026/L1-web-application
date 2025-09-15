@@ -2,8 +2,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from typing import Union, List, Dict
 
-from dash import html
-from typing import Optional, List
+from typing import Optional
 
 
 def flex_builder(
@@ -175,7 +174,7 @@ def textbox_builder(label: str, id: str, value: str = "", placeholder: str = "")
             }
         )
 
-def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary", toast_message: str = "empty message :(", duration_ms: int = 3000, position: str = "top"):
+def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary", toast_message: Union[str, html.Div] = "empty message :(", duration_ms: int = 3000, position: str = "top"):
     """
     Creates a button that triggers a toast notification.
 
@@ -190,23 +189,28 @@ def toasty_button(id: str, label: Union[str, html.Div], color: str = "secondary"
     Returns:
         html.Div: A Div containing the button and toast components.
     """
+    btn_id = id
+    toast_id = id + "-toast"
     btn = html.Div([
         dbc.Button(
             label,
-            id=id,
+            id=btn_id,
             color=color,
             n_clicks=0,
+            outline=True,
         ),
         dbc.Toast(
             toast_message,
-            id=(id+"-toast"),
-            header=f"Notification {id}",
+            id=toast_id,
+            header=html.Div(f"{id}", style={"font-weight":"bold"}),
+            icon="success",
             is_open=False,
             duration=duration_ms,
-            dismissable=True,
             style={
-                "position": "absolute",
-                position: 0
+                "position": "fixed",
+                "top": 66, 
+                "right": 10, 
+                "width": 350
             },
         )
     ])

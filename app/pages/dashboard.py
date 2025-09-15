@@ -1,14 +1,19 @@
 from dash import html, callback, Output, Input
+import dash_bootstrap_components as dbc
 
-from components.builders import flex_builder, dropdown_builder, textbox_builder
-from components.TemperatureCard import TemperatureCard
+from components.builders import flex_builder, dropdown_builder
+from components.SensorCard import SensorCard
 from visuals.temperature_chart import create_chart
 
 class DashboardPage:
     def __init__(self, app):
         self.app = app
-        self.tc1 = TemperatureCard(app, sensor_id=1)
-        self.tc2 = TemperatureCard(app, sensor_id=2)
+
+        self.tc1 = SensorCard(app, sensor_id=1)
+        self.tc1.create()
+
+        self.tc2 = SensorCard(app, sensor_id=2)
+        self.tc2.create()
 
         if app is not None:
             self.callbacks()
@@ -41,13 +46,8 @@ class DashboardPage:
             size="md",
         )
 
-        temp_card_1 = html.Div(
-            id="temp-card-1"
-        )
-
-        temp_card_2 = html.Div(
-            id="temp-card-2"
-        )
+        temp_card_1 = self.tc1.render()
+        temp_card_2 = self.tc2.render()
 
         temp_cards = html.Div(
             flex_builder(
@@ -89,10 +89,6 @@ class DashboardPage:
             }
 
         @callback(
-            # cards
-            Output("temp-card-1", "children"),
-            Output("temp-card-2", "children"),
-            
             # visuals
             Output("line-chart", "children"),
             Input("selections", "data")
@@ -100,12 +96,9 @@ class DashboardPage:
         def update_visuals(selections):
             time_unit = selections.get("time")
             temp_unit = selections.get("temp")
-            
-            for card in [self.tc1, self.tc2]:
-                card.set_unit(time_unit)
-            
+
             # TODO get the global df from redis
             line_chart = create_chart(df=None, time_unit=time_unit, temp_unit=temp_unit)
             # todo, other charts: time, min, max, avg
 
-            return self.tc1.render(), self.tc2.render(), line_chart
+            return line_chart
