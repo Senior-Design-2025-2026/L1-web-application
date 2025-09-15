@@ -4,6 +4,8 @@ from flask import Flask
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
+from components.footer import footer
+
 # from db_conn.db_methods import DBConnection
 
 server = Flask(__name__)
@@ -26,10 +28,29 @@ navbar = dbc.NavbarSimple(
     dark=True
 )
 
+
+# ------------------- footer ------------------ #
+linkedIn_links = {
+    "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
+    "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
+    "Steven Austin": "https://wwww.linkedin.com/in/steven-austin-does-not-have-a-linked-in",
+    "Zack Mulholland": "https://www.linkedin.com/in/zack-mulholland-317914254/",
+}
+
+project_links = {
+    "Github": "https://github.com/Senior-Design-2025-2026",
+    "Server Code": "https://github.com/Senior-Design-2025-2026/L1-web-server",
+    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat"
+}
+
+footer = footer(project_links=project_links, linkedIn_links=linkedIn_links)
+
+
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     navbar,
     html.Div(id='page-content'),
+    footer
 ])
 
 
@@ -55,4 +76,4 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8050)
+    app.run(debug=True, port=8050)

@@ -31,12 +31,6 @@ def create_chart(
     Returns:
         go.Figure: Plotly figure object for the temperature readings.
     """
-    # TODO REMOVE
-    df = pd.DataFrame({
-        "id": [1]*10 + [2]*10,
-        "time": list(range(10)) + list(range(10)),
-        "temperature": [20 + i for i in range(10)] + [18 + i*3 for i in range(10)]
-    })
 
     line_width = 2
 

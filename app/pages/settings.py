@@ -1,6 +1,6 @@
 from dash import html
 
-from components.builders import flex_builder, toasty_button
+from components.builders import flex_builder
 from components.UserConfig import UserConfig
 
 def _walk_ids(component, path="root", found=None):

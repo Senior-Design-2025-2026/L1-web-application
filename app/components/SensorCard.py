@@ -39,7 +39,7 @@ class SensorCard:
         )
     
     def render(self):
-        return html.Div(self.btn, id=f"temp-card-{self._sensor_id}")
+        return html.Div(self.btn, id=f"sensor-card-{self._sensor_id}")
 
     def _layout(self):
         label = html.Div(
@@ -95,14 +95,13 @@ class SensorCard:
 
     def callbacks(self):
         @callback(
-            Output(f"temp-card-{self._sensor_id}", "children"),
+            Output(f"sensor-card-{self._sensor_id}", "children"),
             Output(f"btn-sensor-{self._sensor_id}-text", "children"),
             Output(f"btn-sensor-{self._sensor_id}-toast", "is_open"),
             Input(f"btn-sensor-{self._sensor_id}", "n_clicks"),
-            Input("time-dropdown", "value"),
             Input("temp-dropdown", "value"),
         )
-        def toggle_sensor(n, time_u, temp_u):
+        def toggle_sensor(n, temp_u):
             # change unit
             self.set_unit(temp_u)
 

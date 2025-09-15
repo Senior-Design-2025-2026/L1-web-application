@@ -12,7 +12,7 @@ def flex_builder(
     size: str = "md",
     justification: Optional[str] = None,
     alignment: Optional[str] = None,
-    fill: bool = True
+    fill: bool = True,
 ) -> html.Div:
     """
     Creates a styled Dash container (Div) with configurable direction, size, justification, alignment, and child elements.

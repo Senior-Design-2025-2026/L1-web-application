@@ -1,18 +1,39 @@
 from dash import html, callback, Output, Input
 
+import pandas as pd
+
 from components.builders import flex_builder, dropdown_builder
 from components.SensorCard import SensorCard
 from visuals.temperature_chart import create_chart
+from visuals.StatCard import StatCard
+
+# TODO REMOVE (TESTING DATAFRAME)
+TESTING = pd.DataFrame({
+    "id": [1]*10 + [2]*10,
+    "time": list(range(10)) + list(range(10)),
+    "temperature": [5 + i for i in range(10)] + [18 + i*3 for i in range(10)]
+})
 
 class DashboardPage:
     def __init__(self, app):
         self.app = app
 
+        # SENSOR CARDS
         self.tc1 = SensorCard(app, sensor_id=1)
         self.tc1.create()
 
         self.tc2 = SensorCard(app, sensor_id=2)
         self.tc2.create()
+
+        # STAT CARDS
+        self.avg1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="avg", test_df=TESTING)
+        self.min1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="min", test_df=TESTING)
+        self.max1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="max", test_df=TESTING)
+
+        self.avg2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="avg", test_df=TESTING)
+        self.min2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="min", test_df=TESTING)
+        self.max2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="max", test_df=TESTING)
+
 
         if app is not None:
             self.callbacks()
@@ -45,33 +66,61 @@ class DashboardPage:
             size="md",
         )
 
-        temp_card_1 = self.tc1.render()
-        temp_card_2 = self.tc2.render()
+        # VISUALS
+        sensor_card_1 = self.tc1.render()
+        sensor_card_2 = self.tc2.render()
 
-        temp_cards = html.Div(
-            flex_builder(
-                direction="row",
-                children=[
-                    temp_card_1,
-                    temp_card_2
-                ],
-                alignment="center",
-                justification="center",
-            ),
-            style={
-                "width":"100%",
-                "height":"100%",
-            }
-        )
+        sensor_1_avg = self.avg1.create()
+        sensor_2_avg = self.avg2.create()
+
+        sensor_1_min = self.min1.create()
+        sensor_2_min = self.min2.create()
+
+        sensor_1_max = self.max1.create()
+        sensor_2_max = self.max2.create()
 
         readings_chart = html.Div(id="line-chart")
+
+        reading_flex = flex_builder(
+            direction="row",
+            children=[readings_chart],
+            bordered=True
+        )
+
+        sensor_row_1 = flex_builder(
+            direction="row",
+            children=[
+                sensor_card_1, sensor_1_avg, sensor_1_min, sensor_1_max
+            ]
+        )
+
+        sensor_row_2 = flex_builder(
+            direction="row",
+            children=[
+                sensor_card_2, sensor_2_avg, sensor_2_min, sensor_2_max
+            ]
+        )
+
+        stats_flex = flex_builder(
+            direction="column",
+            children=[
+                sensor_row_1,
+                sensor_row_2
+            ]
+        )
+
+        visuals_row = flex_builder(
+            direction="row",
+            children=[
+                reading_flex, stats_flex
+            ]
+        )
 
         return flex_builder(
             direction="column",
             children=[
                 dropdown_container,
-                readings_chart,
-                temp_cards
+                visuals_row,
             ],
         )
     
@@ -96,7 +145,7 @@ class DashboardPage:
         def update_visuals(time_u, temp_u):
 
             # TODO get the global df from redis
-            line_chart = create_chart(df=None, time_unit=time_u, temp_unit=temp_u)
+            line_chart = create_chart(df=TESTING, time_unit=time_u, temp_unit=temp_u)
             # todo, other charts: time, min, max, avg
 
             return line_chart
