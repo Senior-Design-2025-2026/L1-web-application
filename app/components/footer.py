@@ -8,7 +8,7 @@ def footer(project_links: dict = None, linkedIn_links: dict = None):
         row = []
 
         for key, val in links.items():
-            link = dbc.NavLink(key, href=val, className="link")
+            link = dbc.NavLink(key, href=val, external_link= 'True', target='_blank', style={"color":"#454545", "text-decoration":"underline"})
             row.append(link)
 
         return row
@@ -20,7 +20,7 @@ def footer(project_links: dict = None, linkedIn_links: dict = None):
         flex_builder(
             direction="column",
             children=[
-                html.Div("Lab 1: Senior Design"),
+                html.Div("Lab 1: Senior Design", style={"font-weight":"bold", "font-size":"20px"}),
 
                 # linked ins
                 flex_builder(
@@ -39,7 +39,15 @@ def footer(project_links: dict = None, linkedIn_links: dict = None):
                 ),
             ],
         ), 
-        className="footer"
+        style={
+            "display": "flex",
+            "justify-content": "center",
+            "align-items": "center",
+            "boxShadow": "0 -4px 6px rgba(0, 0, 0, 0.1)",  
+            "padding": "10px",
+            "backgroundColor": "#c7c6c5"
+
+        },
     )
 
     return layout

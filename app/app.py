@@ -14,9 +14,11 @@ app = Dash(__name__,
         server=server, 
         suppress_callback_exceptions=True, 
         external_stylesheets=[dbc.themes.BOOTSTRAP],
-        prevent_initial_callbacks="initial_duplicate"
+        prevent_initial_callbacks="initial_duplicate",
+        assets_folder="./assets"
         )
 
+# ------------------- NAVBAR ------------------ #
 navbar = dbc.NavbarSimple(
     children=[
         dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
@@ -29,7 +31,7 @@ navbar = dbc.NavbarSimple(
 )
 
 
-# ------------------- footer ------------------ #
+# ------------------- FOOTER ------------------ #
 linkedIn_links = {
     "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
     "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
