@@ -6,10 +6,11 @@ import dash_bootstrap_components as dbc
 from pathlib import Path
 
 from pages.home import HomePage
-from pages.dashboard import DashboardPage
-from pages.settings import SettingsPage
+from pages.analytics import analyticsPage
+from pages.configuration import configurationPage
 
 from components.header import header
+from components.theme_toggle import theme_toggle
 
 # from db_conn.db_methods import DBConnection
 
@@ -27,8 +28,8 @@ db_path = "app/db_conn/Lab1.db"
 
 # ----------------- APP ROUTING ----------------- #   
 home_page_obj      = HomePage(app)
-dashboard_page_obj = DashboardPage(app)
-settings_page_obj  = SettingsPage(app)
+analytics_page_obj = AnalyticsPage(app)
+configuration_page_obj  = ConfigurationPage(app)
 
 app.layout = dmc.MantineProvider(
     children=[
@@ -51,10 +52,10 @@ def display_page(pathname):
     print("PATH", pathname)
     if pathname == '/' or pathname == '/home':
         return home_page_obj.layout()
-    elif pathname == '/dashboard':
-        return dashboard_page_obj.layout()
-    elif pathname == '/config':
-        return settings_page_obj.layout()
+    elif pathname == '/analytics':
+        return analytics_page_obj.layout()
+    elif pathname == '/configuration':
+        return configuration_page_obj.layout()
     else:
         return html.Div("404 Page Not Found")
 

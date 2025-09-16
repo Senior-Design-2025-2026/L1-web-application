@@ -12,13 +12,7 @@ theme_toggle = dmc.Switch(
     id="color-scheme-switch",
     persistence=True,
     color="grey",
-    size="lg"
-)
-
-app = Dash()
-
-app.layout = dmc.MantineProvider(
-    [theme_toggle, dmc.Text("Your page content")],
+    size="lg",
 )
 
 clientside_callback(

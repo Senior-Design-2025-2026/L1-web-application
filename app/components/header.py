@@ -5,13 +5,13 @@ import dash_bootstrap_components as dbc
 from components.theme_toggle import theme_toggle
 from dash import Dash, Input, Output,  clientside_callback
 
-LOGO_DARK = get_asset_url("iowa-gold.png")
-LOGO_LIGHT = get_asset_url("iowa-black.png")
+LOGO_DARK = "iowa-gold.png"
+LOGO_LIGHT = "iowa-black.png"
 
 PAGE_LINKS= {
     "Home": "mdi:home-outline",         # vals are icons
-    "Dashboard": "raphael:temp",
-    "Config": "material-symbols:mail-outline",
+    "Analytics": "raphael:temp",
+    "Configuration": "material-symbols:mail-outline",
 }
 
 LINKEDIN_ICON = "mdi:linkedin"
@@ -39,9 +39,12 @@ for key,val in PAGE_LINKS.items():
     href = f"/{key.lower()}"
     page_items.append(
         dmc.NavLink(
-            label=key,
+            label=dmc.Text(
+                key, 
+                fz={"base":14, "sm":10, "md":12, "lg":18}
+            ),
             href=href,
-            leftSection=DashIconify(icon=val)
+            leftSection=DashIconify(icon=val),
         )
     )
 
@@ -54,14 +57,16 @@ for key,val in LINKEDIN_LINKS.items():
             key,
             href=val,
             target="_blank",
-            leftSection=DashIconify(icon=LINKEDIN_ICON)
+            leftSection=DashIconify(icon=LINKEDIN_ICON),
+            fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     )
 
 linkedIn_submenu = dmc.SubMenu([
     dmc.SubMenuTarget(
         dmc.SubMenuItem(
-            "Team Members"
+            "Team 3",
+            fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     ),
     dmc.SubMenuDropdown(
@@ -83,14 +88,16 @@ for key,val in DOCUMENTATION_LINKS.items():
             key,
             href=val,
             target="_blank",
-            leftSection=DashIconify(icon=icon)
+            leftSection=DashIconify(icon=icon),
+            fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     )
 
 documentation_submenu = dmc.SubMenu([
     dmc.SubMenuTarget(
         dmc.SubMenuItem(
-            "Project Docs"
+            "Project Docs",
+            fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     ),
     dmc.SubMenuDropdown(
@@ -116,7 +123,6 @@ def header():
                 id="header-title",
                 c="white",
                 fw=700,
-                size={"base": "md", "sm": "lg", "md": "xl"}, 
             ),
         ],
         gap={"base": "xs", "sm": "md"},
@@ -130,7 +136,10 @@ def header():
                 [
                     dmc.MenuTarget(
                         dmc.ActionIcon(
-                            DashIconify(icon="stash:burger-classic-light", width=20),
+                            DashIconify(
+                                icon="stash:burger-classic-light",
+                                width=20
+                            ),
                             w={"base": 32, "sm": 36, "md": 40},
                             h={"base": 32, "sm": 36, "md": 40},
                             color=dmc.DEFAULT_THEME["colors"]["yellow"][6],
@@ -140,10 +149,16 @@ def header():
                     ),
                     dmc.MenuDropdown(
                         [ 
-                            dmc.MenuLabel("Pages"),
+                            dmc.MenuLabel(
+                                "Pages", 
+                                fz={"base":12, "sm":8, "md":10, "lg":14}
+                            ),
                             *page_items,
                             dmc.MenuDivider(),
-                            dmc.MenuLabel("External Links"), 
+                            dmc.MenuLabel(
+                                "External Links", 
+                                fz={"base":12, "sm":8, "md":10, "lg":14}
+                            ),
                             linkedIn_submenu, 
                             documentation_submenu, 
                         ]
@@ -151,6 +166,7 @@ def header():
                 ]
             ),
         ],
+        gap={"base": "xs", "sm": "md"},
         align="center",
     )
 
@@ -168,6 +184,6 @@ def header():
 )
 def color_header(checked):
     if checked:                 # checked is dark mode
-        return LOGO_DARK, "white"
+        return get_asset_url(LOGO_DARK), "white"
     else:
-        return LOGO_LIGHT, dmc.DEFAULT_THEME["colors"]["yellow"][6]
+        return get_asset_url(LOGO_LIGHT), dmc.DEFAULT_THEME["colors"]["yellow"][6]
