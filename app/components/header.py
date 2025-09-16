@@ -3,9 +3,10 @@ from dash_iconify import DashIconify
 from dash import Output, Input, callback, html, get_asset_url
 import dash_bootstrap_components as dbc
 from components.theme_toggle import theme_toggle
+from dash import Dash, Input, Output,  clientside_callback
 
-LOGO_DARK = "/app/assets/iowa-gold.png"
-LOGO_LIGHT = "/app/assets/iowa-black.png"
+LOGO_DARK = get_asset_url("iowa-gold.png")
+LOGO_LIGHT = get_asset_url("iowa-black.png")
 
 PAGE_LINKS= {
     "Home": "mdi:home-outline",         # vals are icons
@@ -97,70 +98,81 @@ documentation_submenu = dmc.SubMenu([
     )
 ])
 
-# ---------- HEADER COMPONENT ---------- # 
 def header():
-    logo = get_asset_url(LOGO_DARK)
-    title = "ECE Senior Design Lab 1 (Team 3)"
+    title = "ECE Senior Design Lab 1 - Team 3"
 
-    lhs = html.Div(
+    # lhs
+    lhs = dmc.Group(
         [
-            html.Img(
-                src=logo,
+            dmc.Image(
+                id="header-logo",
+                src=LOGO_DARK,
+                w=80
             ),
-            html.Div(
+            dmc.Divider(
+                orientation="vertical",
+                size="xs",
+                color="gray",
+            ),
+            dmc.Text(
                 title,
-                style={
-                    "font-size":"24px",
-                    "font-weight":"bold",
-                    "color":"#FFDD00"
-                }
-            )
+                c="white",
+                fw=700,
+                size="xl",
+                id="header-title"
+            ),
         ],
-        style={
-            "display":"flex",
-            "justify-contents":"space-between",
-            "align-items":"center",
-        }
+        gap="md",
+        align="center",
     )
 
-    rhs = dmc.Menu(
+    # rhs
+    rhs = dmc.Group(
         [
             theme_toggle,
-            dmc.MenuTarget(
-                dmc.ActionIcon(DashIconify(icon="stash:burger-classic-light"))
-            ),
-
-            dmc.MenuDropdown(
+            dmc.Menu(
                 [
-                    # pages
-                    dmc.MenuLabel("Pages"),
-                    *page_items,
-
-                    # divider
-                    dmc.MenuDivider(),
-                    dmc.MenuLabel("External Links"),
-
-                    # linked in
-                    linkedIn_submenu,
-
-                    # docs
-                    documentation_submenu
+                    dmc.MenuTarget(
+                        dmc.ActionIcon(
+                            DashIconify(icon="stash:burger-classic-light", width=20),
+                            w=40,
+                            h=40,
+                            color=dmc.DEFAULT_THEME["colors"]["yellow"][6],
+                            variant="filled",    
+                            radius="md"
+                        )
+                    ),
+                    dmc.MenuDropdown(
+                        [
+                            dmc.MenuLabel("Pages"),
+                            *page_items,
+                            dmc.MenuDivider(),
+                            dmc.MenuLabel("External Links"),
+                            linkedIn_submenu,
+                            documentation_submenu,
+                        ]
+                    ),
                 ]
-            )
+            ),
         ],
+        align="center",
     )
 
-    header = html.Div(
-        [
-            lhs,
-            rhs,
-        ],
-        style={
-            "display":"flex",
-            "justify-contents":"space-between",
-            "align-items":"center",
-            "width":"100%"
-        }
+    # main header bar
+    return dmc.Flex(
+        [lhs, rhs],
+        justify="space-between",
+        align="center",
+        style={"width": "100%", "padding": "8px 20px"}
     )
 
-    return header
+@callback(
+    Output("header-logo", "src"),
+    Output("header-title", "c"),
+    Input("color-scheme-switch", "checked")
+)
+def color_header(checked):
+    if checked:                 # checked is dark mode
+        return LOGO_DARK, "white"
+    else:
+        return LOGO_LIGHT, "#FFDD00"

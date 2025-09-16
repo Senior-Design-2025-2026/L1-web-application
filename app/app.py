@@ -3,6 +3,8 @@ from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_rend
 import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
 
+from pathlib import Path
+
 from pages.home import HomePage
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
@@ -14,6 +16,7 @@ from components.header import header
 # -------------- APP SETUP ------------ #
 app = Dash(
     name="Lab1", 
+    assets_folder=str(Path.cwd() / "app" / "assets")
 )
 
 header = header()
@@ -28,17 +31,16 @@ dashboard_page_obj = DashboardPage(app)
 settings_page_obj  = SettingsPage(app)
 
 app.layout = dmc.MantineProvider(
-    [
+    children=[
         dcc.Location(id='url'),
-        html.Div(
+        dmc.AppShell(
             [
-                header,
-                html.Div(
-                    id="page-content"
-                )
+                dmc.AppShellHeader(header),
+                dmc.AppShellMain(html.Div(id="page-content"))
             ],
+            header={"height":60, "width":"100%"}
         )
-    ]
+    ],
 )
 
 @app.callback(
