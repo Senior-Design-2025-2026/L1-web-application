@@ -4,7 +4,6 @@ from flask import Flask
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
-from components.footer import footer
 
 # from db_conn.db_methods import DBConnection
 
@@ -31,7 +30,7 @@ navbar = dbc.NavbarSimple(
 )
 
 
-# ------------------- FOOTER ------------------ #
+# ------------------- Footer Links ------------------ #
 linkedIn_links = {
     "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
     "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
@@ -46,16 +45,12 @@ project_links = {
     "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat",
 }
 
-footer = footer(project_links=project_links, linkedIn_links=linkedIn_links)
-
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     navbar,
     html.Div(id='page-content'),
-    footer
 ])
-
 
 # ---------------- DB CONNECTION ---------------- #
 db_path = "app/db_conn/Lab1.db"
