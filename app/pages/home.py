@@ -1,8 +1,8 @@
 from dash import html
 
-class DashboardPage:
+class HomePage:
     def __init__(self, app):
         self.app = app
 
     def layout(self) -> html.Div:
-        return html.Div("dashboard")
+        return html.Div("home")
