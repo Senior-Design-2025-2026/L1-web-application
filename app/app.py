@@ -24,9 +24,9 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
         dbc.NavItem(dbc.NavLink("Settings", href="/settings"))
     ],
-    brand="Lab 1",
+    brand="ECE Senior Design Lab 1: Temperature System",
     brand_href="/",
-    color="primary",
+    color="secondary",
     dark=True
 )
 
@@ -42,7 +42,8 @@ linkedIn_links = {
 project_links = {
     "Github": "https://github.com/Senior-Design-2025-2026",
     "Server Code": "https://github.com/Senior-Design-2025-2026/L1-web-server",
-    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat"
+    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat",
+    "Jira": "https://mattnkrueger.atlassian.net/jira/software/projects/SD/boards/1"
 }
 
 footer = footer(project_links=project_links, linkedIn_links=linkedIn_links)
@@ -78,4 +79,4 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8050)
+    app.run(debug=True, port="8050")
