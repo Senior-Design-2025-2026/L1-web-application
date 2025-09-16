@@ -26,7 +26,7 @@ PDF_ICON = "teenyicons:pdf-outline"
 GITHUB_ICON = "mdi:github"
 DOCUMENTATION_LINKS = {
     "Project Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
-    "Team Github": "https://github.com/Senior-Design-2025-2026",
+    "Senior Design Team 3": "https://github.com/Senior-Design-2025-2026",
     "Server Code": "https://github.com/Senior-Design-2025-2026/L1-web-server",
     "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat",
 }
@@ -98,35 +98,31 @@ documentation_submenu = dmc.SubMenu([
     )
 ])
 
-def header():
-    title = "ECE Senior Design Lab 1 - Team 3"
+# --------------------- HEADER --------------------- #
 
-    # lhs
+def header():
+    title = "ECE Senior Design Lab 1"
+
     lhs = dmc.Group(
         [
             dmc.Image(
                 id="header-logo",
                 src=LOGO_DARK,
-                w=80
+                w={"base": 40, "sm": 60, "md": 80}, 
             ),
-            dmc.Divider(
-                orientation="vertical",
-                size="xs",
-                color="gray",
-            ),
+            dmc.Divider(orientation="vertical", size="xs", color="gray"),
             dmc.Text(
                 title,
+                id="header-title",
                 c="white",
                 fw=700,
-                size="xl",
-                id="header-title"
+                size={"base": "md", "sm": "lg", "md": "xl"}, 
             ),
         ],
-        gap="md",
+        gap={"base": "xs", "sm": "md"},
         align="center",
     )
 
-    # rhs
     rhs = dmc.Group(
         [
             theme_toggle,
@@ -135,21 +131,21 @@ def header():
                     dmc.MenuTarget(
                         dmc.ActionIcon(
                             DashIconify(icon="stash:burger-classic-light", width=20),
-                            w=40,
-                            h=40,
+                            w={"base": 32, "sm": 36, "md": 40},
+                            h={"base": 32, "sm": 36, "md": 40},
                             color=dmc.DEFAULT_THEME["colors"]["yellow"][6],
-                            variant="filled",    
-                            radius="md"
+                            variant="filled",
+                            radius="md",
                         )
                     ),
                     dmc.MenuDropdown(
-                        [
+                        [ 
                             dmc.MenuLabel("Pages"),
                             *page_items,
                             dmc.MenuDivider(),
-                            dmc.MenuLabel("External Links"),
-                            linkedIn_submenu,
-                            documentation_submenu,
+                            dmc.MenuLabel("External Links"), 
+                            linkedIn_submenu, 
+                            documentation_submenu, 
                         ]
                     ),
                 ]
@@ -158,12 +154,11 @@ def header():
         align="center",
     )
 
-    # main header bar
     return dmc.Flex(
         [lhs, rhs],
         justify="space-between",
         align="center",
-        style={"width": "100%", "padding": "8px 20px"}
+        style={"width": "100%", "padding": "8px 20px"},
     )
 
 @callback(
@@ -175,4 +170,4 @@ def color_header(checked):
     if checked:                 # checked is dark mode
         return LOGO_DARK, "white"
     else:
-        return LOGO_LIGHT, "#FFDD00"
+        return LOGO_LIGHT, dmc.DEFAULT_THEME["colors"]["yellow"][6]
