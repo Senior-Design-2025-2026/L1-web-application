@@ -1,10 +1,11 @@
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
-from dash import Output, Input, callback, html
+from dash import Output, Input, callback, html, get_asset_url
 import dash_bootstrap_components as dbc
+from components.theme_toggle import theme_toggle
 
-LOGO_DARK = "app/assets/iowa-gold.png"
-LOGO_LIGHT = "app/assets/iowa-black.png"
+LOGO_DARK = "/app/assets/iowa-gold.png"
+LOGO_LIGHT = "/app/assets/iowa-black.png"
 
 PAGE_LINKS= {
     "Home": "mdi:home-outline",         # vals are icons
@@ -98,46 +99,68 @@ documentation_submenu = dmc.SubMenu([
 
 # ---------- HEADER COMPONENT ---------- # 
 def header():
-    return dmc.Flex(
+    logo = get_asset_url(LOGO_DARK)
+    title = "ECE Senior Design Lab 1 (Team 3)"
+
+    lhs = html.Div(
         [
-            dmc.Group(
-                [
-                    dmc.Image(
-                        id="header-icon",
-                        src=LOGO_LIGHT,
-                        h=32
-                    ),
-                    dmc.Title(
-                        "ECE Lab 1: Temperature Sensor",
-                        c="yellow"
-                    ),
-                ],
-                h="100%",
-                px="md"
+            html.Img(
+                src=logo,
             ),
-            dmc.Menu(
+            html.Div(
+                title,
+                style={
+                    "font-size":"24px",
+                    "font-weight":"bold",
+                    "color":"#FFDD00"
+                }
+            )
+        ],
+        style={
+            "display":"flex",
+            "justify-contents":"space-between",
+            "align-items":"center",
+        }
+    )
+
+    rhs = dmc.Menu(
+        [
+            theme_toggle,
+            dmc.MenuTarget(
+                dmc.ActionIcon(DashIconify(icon="stash:burger-classic-light"))
+            ),
+
+            dmc.MenuDropdown(
                 [
-                    # click the burger
-                    dmc.MenuTarget(
-                        dmc.ActionIcon(DashIconify(icon="stash:burger-classic-light"))
-                    ),
+                    # pages
+                    dmc.MenuLabel("Pages"),
+                    *page_items,
 
-                    dmc.MenuDropdown([
-                        # pages
-                        dmc.MenuLabel("Pages"),
-                        *page_items,
+                    # divider
+                    dmc.MenuDivider(),
+                    dmc.MenuLabel("External Links"),
 
-                        # divider
-                        dmc.MenuDivider(),
-                        dmc.MenuLabel("External Links"),
+                    # linked in
+                    linkedIn_submenu,
 
-                        # linked in
-                        linkedIn_submenu,
-
-                        # docs
-                        documentation_submenu
-                    ])
+                    # docs
+                    documentation_submenu
                 ]
             )
-        ]
+        ],
     )
+
+    header = html.Div(
+        [
+            lhs,
+            rhs,
+        ],
+        style={
+            "display":"flex",
+            "justify-contents":"space-between",
+            "align-items":"center",
+            "width":"100%"
+        }
+    )
+
+    return header

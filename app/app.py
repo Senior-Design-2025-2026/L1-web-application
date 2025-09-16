@@ -7,7 +7,6 @@ from pages.home import HomePage
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
 
-from components.theme_toggle import theme_toggle
 from components.header import header
 
 # from db_conn.db_methods import DBConnection
@@ -15,25 +14,7 @@ from components.header import header
 # -------------- APP SETUP ------------ #
 app = Dash(
     name="Lab1", 
-    suppress_callback_exceptions=True, 
 )
-
-
-# ---------------- THEME ------------------ #
-# Dash Mantine Components provides a light/ 
-# dark mode context. Using default theme
-# for simplicity...
-theme={
-    "primaryColor": "yellow",                          
-    "defaultRadius": "sm",
-    "components": {
-        "Card": {
-            "defaultProps": {
-                "shadow": "xs"
-            }
-        }
-    }
-}
 
 header = header()
 
@@ -49,18 +30,14 @@ settings_page_obj  = SettingsPage(app)
 app.layout = dmc.MantineProvider(
     [
         dcc.Location(id='url'),
-        theme_toggle, 
-        header,
-        html.Div(id="page-content")
-        # dmc.AppShell(
-        #     [
-        #         dmc.AppShellHeader(header),
-        #         dmc.AppShellMain(id="page-content"),
-        #     ],
-        #     header={"height": 48},
-        #     padding="md",
-        #     id="appshell"
-        # )
+        html.Div(
+            [
+                header,
+                html.Div(
+                    id="page-content"
+                )
+            ],
+        )
     ]
 )
 
