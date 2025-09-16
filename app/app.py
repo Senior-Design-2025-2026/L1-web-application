@@ -48,6 +48,7 @@ settings_page_obj  = SettingsPage(app)
 
 app.layout = dmc.MantineProvider(
     [
+        dcc.Location(id='url'),
         theme_toggle, 
         header,
         html.Div(id="page-content")
@@ -72,7 +73,7 @@ def display_page(pathname):
     if pathname == '/' or pathname == '/home':
         return home_page_obj.layout()
     elif pathname == '/dashboard':
-        return settings_page_obj.layout()
+        return dashboard_page_obj.layout()
     elif pathname == '/config':
         return settings_page_obj.layout()
     else:
