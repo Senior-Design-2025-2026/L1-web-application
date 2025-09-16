@@ -1,5 +1,6 @@
 from dash import html
 import dash_bootstrap_components as dbc
+from dash_iconify import DashIconify
 
 from components.builders import flex_builder
 
