@@ -6,8 +6,8 @@ import dash_bootstrap_components as dbc
 from pathlib import Path
 
 from pages.home import HomePage
-from pages.analytics import analyticsPage
-from pages.configuration import configurationPage
+from pages.analytics import AnalyticsPage
+from pages.configuration import ConfigurationPage
 
 from components.header import header
 from components.theme_toggle import theme_toggle

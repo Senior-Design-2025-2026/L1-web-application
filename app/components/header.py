@@ -57,7 +57,9 @@ for key,val in LINKEDIN_LINKS.items():
             key,
             href=val,
             target="_blank",
-            leftSection=DashIconify(icon=LINKEDIN_ICON),
+            leftSection=DashIconify(
+                icon=LINKEDIN_ICON,
+            ),
             fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     )
