@@ -9,7 +9,7 @@ LOGO_DARK = "iowa-gold.png"
 LOGO_LIGHT = "iowa-black.png"
 
 PAGE_LINKS= {
-    "Home": "mdi:home-outline",         # vals are icons
+    "Home": "mdi:home-outline",    
     "Analytics": "raphael:temp",
     "Configuration": "material-symbols:mail-outline",
 }
@@ -22,7 +22,7 @@ LINKEDIN_LINKS = {
     "Zack Mulholland": "https://www.linkedin.com/in/zack-mulholland-317914254/",
 }
 
-PDF_ICON = "teenyicons:pdf-outline"
+PDF_ICON = "uiw:file-pdf"
 GITHUB_ICON = "mdi:github"
 DOCUMENTATION_LINKS = {
     "Project Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
@@ -59,6 +59,7 @@ for key,val in LINKEDIN_LINKS.items():
             target="_blank",
             leftSection=DashIconify(
                 icon=LINKEDIN_ICON,
+                color="0077B5"
             ),
             fz={"base":14, "sm":10, "md":14, "lg":18}
         )
@@ -67,12 +68,12 @@ for key,val in LINKEDIN_LINKS.items():
 linkedIn_submenu = dmc.SubMenu([
     dmc.SubMenuTarget(
         dmc.SubMenuItem(
-            "Team 3",
+            "Team 3 Members",
             fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     ),
     dmc.SubMenuDropdown(
-        nested_linkedIn_items
+        nested_linkedIn_items,
     )
 ])
 
@@ -82,15 +83,20 @@ nested_documentation_items = []
 for key,val in DOCUMENTATION_LINKS.items():
     if "pdf" in val:
         icon = PDF_ICON
+        color = "#F40F02"
     elif "github" in val:
         icon = GITHUB_ICON
+        color = "#211F1F"
 
     nested_documentation_items.append(
         dmc.MenuItem(
             key,
             href=val,
             target="_blank",
-            leftSection=DashIconify(icon=icon),
+            leftSection=DashIconify(
+                icon=icon,
+                color=color
+            ),
             fz={"base":14, "sm":10, "md":14, "lg":18}
         )
     )
@@ -110,82 +116,94 @@ documentation_submenu = dmc.SubMenu([
 # --------------------- HEADER --------------------- #
 
 def header():
-    title = "ECE Senior Design Lab 1"
-
     lhs = dmc.Group(
         [
             dmc.Image(
                 id="header-logo",
-                src=LOGO_DARK,
-                w={"base": 40, "sm": 60, "md": 80}, 
+                w="90",
+                h="45",
+                fit="fit"
             ),
-            dmc.Divider(orientation="vertical", size="xs", color="gray"),
-            dmc.Text(
-                title,
+            html.Div(
+                id="header-divider",
+                style={
+                        "background-color": "#c7c6c5",
+                        "border-radius": "20px",
+                        "width": "1px",
+                        "height": "50%"
+                }
+            ),
+            dmc.Title(
+                "Herky's Nest",
                 id="header-title",
-                c="white",
-                fw=700,
-            ),
+                size="xl"
+            )
         ],
-        gap={"base": "xs", "sm": "md"},
-        align="center",
+        h="100%",
+        px="md"
     )
 
-    rhs = dmc.Group(
+    menu = dmc.Menu(
         [
-            theme_toggle,
-            dmc.Menu(
-                [
-                    dmc.MenuTarget(
-                        dmc.ActionIcon(
-                            DashIconify(
-                                icon="stash:burger-classic-light",
-                                width=20
-                            ),
-                            w={"base": 32, "sm": 36, "md": 40},
-                            h={"base": 32, "sm": 36, "md": 40},
-                            color=dmc.DEFAULT_THEME["colors"]["yellow"][6],
-                            variant="filled",
-                            radius="md",
-                        )
+            dmc.MenuTarget(
+                dmc.ActionIcon(
+                    DashIconify(
+                        icon="stash:burger-classic-light"
                     ),
-                    dmc.MenuDropdown(
-                        [ 
-                            dmc.MenuLabel(
-                                "Pages", 
-                                fz={"base":12, "sm":8, "md":10, "lg":14}
-                            ),
-                            *page_items,
-                            dmc.MenuDivider(),
-                            dmc.MenuLabel(
-                                "External Links", 
-                                fz={"base":12, "sm":8, "md":10, "lg":14}
-                            ),
-                            linkedIn_submenu, 
-                            documentation_submenu, 
-                        ]
-                    ),
-                ]
+                    size="lg",
+                    color=dmc.DEFAULT_THEME["colors"]["yellow"][6]
+                ),
             ),
-        ],
-        gap={"base": "xs", "sm": "md"},
-        align="center",
+            dmc.MenuDropdown(
+                [
+                    dmc.MenuLabel(
+                        "Pages",
+                        fz="md"
+                    ),
+                    *page_items,
+                    dmc.MenuDivider(),
+                    dmc.MenuLabel(
+                        "External Links",
+                        fz="md"
+                    ),
+                    documentation_submenu,
+                    linkedIn_submenu
+                ]
+            )
+        ]
     )
 
-    return dmc.Flex(
-        [lhs, rhs],
-        justify="space-between",
-        align="center",
-        style={"width": "100%", "padding": "8px 20px"},
+    rhs = dmc.Center(
+        [
+            html.Div(
+                theme_toggle, 
+                style={
+                    "marginRight":"1em"
+                }
+                ),
+            menu
+        ],
+        h="100%",
     )
+
+    return dmc.Group(
+            [
+                lhs,
+                rhs
+            ],
+            h="100%",
+            align="center",
+            justify="space-between",
+            px="sm"
+        )
 
 @callback(
     Output("header-logo", "src"),
     Output("header-title", "c"),
     Input("color-scheme-switch", "checked")
 )
-def color_header(checked):
-    if checked:                 # checked is dark mode
+def header_theme_toggle(checked):
+    if checked:  
         return get_asset_url(LOGO_DARK), "white"
     else:
         return get_asset_url(LOGO_LIGHT), dmc.DEFAULT_THEME["colors"]["yellow"][6]

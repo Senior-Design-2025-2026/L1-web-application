@@ -16,7 +16,7 @@ from components.theme_toggle import theme_toggle
 
 # -------------- APP SETUP ------------ #
 app = Dash(
-    name="Lab1", 
+    name="ECE Senior Design Lab 1", 
     assets_folder=str(Path.cwd() / "app" / "assets")
 )
 
