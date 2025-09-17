@@ -1,8 +1,20 @@
 from dash import html
+import dash_mantine_components as dmc
+
+from components.aio.thermostat_card import ThermostatCardAIO
 
 class HomePage:
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, db: str = None):
+        self.db = None
 
-    def layout(self) -> html.Div:
-        return html.Div("home")
+    def layout(self):
+        # TODO:
+        # Home Page should consist of 2 simple visuals  
+        #   on laptop: flex horiz
+        #   on phone: flex vert
+        # These are cards with thermometers 
+        # within the button there should be an indicator for off/on
+        # card has action button to expand to a larger visuals?
+        return ThermostatCardAIO("sensor1")
+
+    

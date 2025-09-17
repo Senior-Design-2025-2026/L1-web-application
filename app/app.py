@@ -12,40 +12,78 @@ from pages.configuration import ConfigurationPage
 from components.shell.header import header
 from components.shell.footer import footer
 
-# from db_conn.db_methods import DBConnection
+# ===================================================
+#                 SYSTEM CLOCK 
+# ===================================================
+# configures app to refresh every INTERVAL seconds
+# docs: https://dash.plotly.com/dash-core-components/interval
+INTERVAL = 1
 
-# -------------- APP SETUP ------------ #
+# ===================================================
+#                 DATABASE OBJECT
+# ===================================================
+# using sqlalchemy to handle r/w with database
+# docs: https://www.sqlalchemy.org/
+db_path = "app/db_conn/Lab1.db"
+# db_conn = DBConnection(db_path=db_path)
+
+# ===================================================
+#                 DASH APPLICATION
+# ===================================================
+# This is a python Plotly Dash application
+# plotly dash: https://dash.plotly.com/
+# mantine components: https://www.dash-mantine-components.com/
+
 app = Dash(
     name="ECE Senior Design Lab 1", 
     assets_folder=str(Path.cwd() / "app" / "assets")
 )
 
-header = header()
-footer = footer()
-
-# ---------------- DB CONNECTION ---------------- #
-db_path = "app/db_conn/Lab1.db"
-# db_conn = DBConnection(db_path=db_path)
-
-# ----------------- APP ROUTING ----------------- #   
 home_page_obj      = HomePage(app)
 analytics_page_obj = AnalyticsPage(app)
 configuration_page_obj  = ConfigurationPage(app)
 
 app.layout = dmc.MantineProvider(
+    theme={
+        "primaryColor": "yellow",
+        "defaultRadius": "sm",
+        "black": "#454545",  
+        "components": {
+            "Button": {
+                "defaultProps": {
+                    "shadow": "xs"
+                }
+            },
+            "Card": {
+                "defaultProps": {
+                    "shadow": "xs"
+                }
+            }
+        }
+    },
     children=[
         dcc.Location(id='url'),
+        dcc.Interval(
+            id="system-clock",
+            interval=(INTERVAL * 1000),                 # in ms... 
+            n_intervals=0
+
+        ),
         dmc.AppShell(
             [
-                dmc.AppShellHeader(header),
+                dmc.AppShellHeader(
+                    header()
+                ),
                 dmc.AppShellMain(
                     html.Div(
                         id="page-content")
                     ),
-                dmc.AppShellFooter(footer)
+                dmc.AppShellFooter(
+                    footer()
+                )
             ],
             header={"height":60, "width":"100%"},
-            footer={"height":120, "width":"100%"}
+            footer={"height":100, "width":"100%"}
         )
     ],
 )

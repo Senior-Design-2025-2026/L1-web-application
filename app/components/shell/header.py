@@ -16,9 +16,9 @@ PAGE_LINKS= {
 
 LINKEDIN_ICON = "mdi:linkedin"
 LINKEDIN_LINKS = {
-    "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
-    "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
     "Steven Austin": "https://wwww.linkedin.com/in/steven-austin-does-not-have-a-linked-in",
+    "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
+    "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
     "Zack Mulholland": "https://www.linkedin.com/in/zack-mulholland-317914254/",
 }
 
@@ -26,9 +26,7 @@ PDF_ICON = "uiw:file-pdf"
 GITHUB_ICON = "mdi:github"
 DOCUMENTATION_LINKS = {
     "Project Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
-    "Senior Design Team 3": "https://github.com/Senior-Design-2025-2026",
-    "Server Code": "https://github.com/Senior-Design-2025-2026/L1-web-server",
-    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat",
+    "Source Code": "https://github.com/Senior-Design-2025-2026",
 }
 
 # ----- build menu items ---- #

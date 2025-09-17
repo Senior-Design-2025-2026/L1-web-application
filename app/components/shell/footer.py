@@ -5,27 +5,27 @@ import dash_bootstrap_components as dbc
 from dash import Dash, Input, Output,  clientside_callback
 
 def footer():
-    class_notice = dmc.Center(
-        [
-            dmc.Text(
-                "Principles of ECE/CSE Design Fall 2025",
-                fz="md",
-            ),
-            dmc.Text(
-                "•",
-                style={
-                    "marginLeft": "0.5em",
-                    "marginRight": "0.5em"
-                }
-            ),
-            dmc.Text(
-                "Labratory 1",
-                fz="md"
-            ),
-        ]
-    )
+    # class_notice = dmc.Center(
+    #     [
+    #         dmc.Text(
+    #             "Principles of ECE/CSE Design Fall 2025",
+    #             fz="md",
+    #         ),
+    #         dmc.Text(
+    #             "•",
+    #             style={
+    #                 "marginLeft": "0.5em",
+    #                 "marginRight": "0.5em"
+    #             }
+    #         ),
+    #         dmc.Text(
+    #             "Labratory 1",
+    #             fz="md"
+    #         ),
+    #     ]
+    # )
 
-    university_notice = dmc.Stack(
+    return dmc.Stack(
         [
             html.Div(
                 [
@@ -35,7 +35,7 @@ def footer():
                         width=14
                     ),
                     dmc.Text(
-                        "Created by Team 3",
+                        "Dashboard Created by Team 3",
                         fz="sm",
                         style={
                             "font-style": "italic",
@@ -67,19 +67,10 @@ def footer():
             )
         ],
         justify="center",
-        align="center"
-    )
-
-    footer = html.Div(
-        [
-            university_notice,
-            class_notice
-        ],
+        align="center",
         style={
             "display":"flex",
             "flex-direction":"column",
             "margin": "1em"
         }
     )
-
-    return footer
