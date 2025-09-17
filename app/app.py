@@ -9,8 +9,8 @@ from pages.home import HomePage
 from pages.analytics import AnalyticsPage
 from pages.configuration import ConfigurationPage
 
-from components.header import header
-from components.theme_toggle import theme_toggle
+from components.shell.header import header
+from components.shell.footer import footer
 
 # from db_conn.db_methods import DBConnection
 
@@ -21,6 +21,7 @@ app = Dash(
 )
 
 header = header()
+footer = footer()
 
 # ---------------- DB CONNECTION ---------------- #
 db_path = "app/db_conn/Lab1.db"
@@ -37,9 +38,14 @@ app.layout = dmc.MantineProvider(
         dmc.AppShell(
             [
                 dmc.AppShellHeader(header),
-                dmc.AppShellMain(html.Div(id="page-content"))
+                dmc.AppShellMain(
+                    html.Div(
+                        id="page-content")
+                    ),
+                dmc.AppShellFooter(footer)
             ],
-            header={"height":60, "width":"100%"}
+            header={"height":60, "width":"100%"},
+            footer={"height":120, "width":"100%"}
         )
     ],
 )

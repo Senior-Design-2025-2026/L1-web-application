@@ -2,7 +2,7 @@ import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 from dash import Output, Input, callback, html, get_asset_url
 import dash_bootstrap_components as dbc
-from components.theme_toggle import theme_toggle
+from components.shell.theme_toggle import theme_toggle
 from dash import Dash, Input, Output,  clientside_callback
 
 LOGO_DARK = "iowa-gold.png"
@@ -86,7 +86,7 @@ for key,val in DOCUMENTATION_LINKS.items():
         color = "#F40F02"
     elif "github" in val:
         icon = GITHUB_ICON
-        color = "#211F1F"
+        color = None
 
     nested_documentation_items.append(
         dmc.MenuItem(
