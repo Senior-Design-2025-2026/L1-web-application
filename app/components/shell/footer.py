@@ -56,7 +56,7 @@ def footer():
                         [
                             dmc.Box("University of Iowa, College of Engineering", ml=5),
                             DashIconify(
-                                icon="tabler:arrow-right",
+                                icon="lsicon:export-filled",
                                 width=12,
                                 height=12,
                             ),

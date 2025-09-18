@@ -198,7 +198,7 @@ def header():
 @callback(
     Output("header-logo", "src"),
     Output("header-title", "c"),
-    Input("color-scheme-switch", "checked")
+    Input("theme", "checked")
 )
 def header_theme_toggle(checked):
     if checked:  

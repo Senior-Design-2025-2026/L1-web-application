@@ -15,6 +15,11 @@ class HomePage:
         # These are cards with thermometers 
         # within the button there should be an indicator for off/on
         # card has action button to expand to a larger visuals?
-        return ThermostatCardAIO("sensor1")
+        return html.Div(
+            [
+                ThermostatCardAIO("Sensor 1"),
+                ThermostatCardAIO("Sensor 2")
+            ]
+        )
 
     

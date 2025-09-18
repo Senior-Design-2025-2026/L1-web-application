@@ -56,9 +56,10 @@ app.layout = dmc.MantineProvider(
             },
             "Card": {
                 "defaultProps": {
-                    "shadow": "xs"
+                    "shadow": "xs",
+                    "radius": "sm"
                 }
-            }
+            },
         }
     },
     children=[
@@ -93,7 +94,6 @@ app.layout = dmc.MantineProvider(
     Input('url', 'pathname')
 )
 def display_page(pathname):
-    print("PATH", pathname)
     if pathname == '/' or pathname == '/home':
         return home_page_obj.layout()
     elif pathname == '/analytics':
