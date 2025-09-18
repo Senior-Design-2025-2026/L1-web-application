@@ -76,15 +76,15 @@ app.layout = dmc.MantineProvider(
                     header()
                 ),
                 dmc.AppShellMain(
-                    html.Div(
-                        id="page-content")
+                    dmc.Box(
+                        id="page-content",
+                        py="md",
+                        px="sm",
                     ),
-                dmc.AppShellFooter(
-                    footer()
-                )
+                ),
+                footer()
             ],
             header={"height":60, "width":"100%"},
-            footer={"height":100, "width":"100%"}
         )
     ],
 )

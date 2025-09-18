@@ -1,5 +1,6 @@
 from gradpyent.gradient import Gradient, RGB
 
+
 MAX = 122
 MIN = 32
 
@@ -12,7 +13,7 @@ def c_to_f(celsius):
 def f_to_c(fahrenheit):
     return (fahrenheit - 32) * 5 / 9
 
-def get_heat_color(temp, unit):
+def get_heat_color(temp, unit: str):
     if unit.lower() == "c":
         temp = c_to_f(temp)
 

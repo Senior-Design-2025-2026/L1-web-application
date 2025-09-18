@@ -14,21 +14,6 @@ PAGE_LINKS= {
     "Configuration": "material-symbols:mail-outline",
 }
 
-LINKEDIN_ICON = "mdi:linkedin"
-LINKEDIN_LINKS = {
-    "Steven Austin": "https://wwww.linkedin.com/in/steven-austin-does-not-have-a-linked-in",
-    "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
-    "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
-    "Zack Mulholland": "https://www.linkedin.com/in/zack-mulholland-317914254/",
-}
-
-PDF_ICON = "uiw:file-pdf"
-GITHUB_ICON = "mdi:github"
-DOCUMENTATION_LINKS = {
-    "Project Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
-    "Source Code": "https://github.com/Senior-Design-2025-2026",
-}
-
 # ----- build menu items ---- #
 # 1. Page links
 page_items = []
@@ -46,70 +31,6 @@ for key,val in PAGE_LINKS.items():
         )
     )
 
-# 2. Linked In links
-nested_linkedIn_items = []
-
-for key,val in LINKEDIN_LINKS.items():
-    nested_linkedIn_items.append(
-        dmc.MenuItem(
-            key,
-            href=val,
-            target="_blank",
-            leftSection=DashIconify(
-                icon=LINKEDIN_ICON,
-                color="0077B5"
-            ),
-            fz={"base":14, "sm":10, "md":14, "lg":18}
-        )
-    )
-
-linkedIn_submenu = dmc.SubMenu([
-    dmc.SubMenuTarget(
-        dmc.SubMenuItem(
-            "Team 3 Members",
-            fz={"base":14, "sm":10, "md":14, "lg":18}
-        )
-    ),
-    dmc.SubMenuDropdown(
-        nested_linkedIn_items,
-    )
-])
-
-# 3. Documetation links
-nested_documentation_items = []
-
-for key,val in DOCUMENTATION_LINKS.items():
-    if "pdf" in val:
-        icon = PDF_ICON
-        color = "#F40F02"
-    elif "github" in val:
-        icon = GITHUB_ICON
-        color = None
-
-    nested_documentation_items.append(
-        dmc.MenuItem(
-            key,
-            href=val,
-            target="_blank",
-            leftSection=DashIconify(
-                icon=icon,
-                color=color
-            ),
-            fz={"base":14, "sm":10, "md":14, "lg":18}
-        )
-    )
-
-documentation_submenu = dmc.SubMenu([
-    dmc.SubMenuTarget(
-        dmc.SubMenuItem(
-            "Project Docs",
-            fz={"base":14, "sm":10, "md":14, "lg":18}
-        )
-    ),
-    dmc.SubMenuDropdown(
-        nested_documentation_items
-    )
-])
 
 # --------------------- HEADER --------------------- #
 
@@ -159,13 +80,6 @@ def header():
                         fz="md"
                     ),
                     *page_items,
-                    dmc.MenuDivider(),
-                    dmc.MenuLabel(
-                        "External Links",
-                        fz="md"
-                    ),
-                    documentation_submenu,
-                    linkedIn_submenu
                 ]
             )
         ]

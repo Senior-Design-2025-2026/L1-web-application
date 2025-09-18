@@ -5,6 +5,9 @@ from dash_iconify import DashIconify
 from utils.temperature_utils import get_heat_color
 import uuid
 
+RANGE_C = [0, 10, 20, 30, 40, 50]
+RANGE_F = [32, 50, 68, 86, 104, 122]
+
 class ThermostatCardAIO(html.Div):
     """
     - text: name of sensor 
@@ -70,6 +73,7 @@ class ThermostatCardAIO(html.Div):
                 id=self.ids.thermometer(aio_id),
                 height=150,
                 width=20,
+
             ),
             id=self.ids.thermometer_div(aio_id)
         )
@@ -79,22 +83,6 @@ class ThermostatCardAIO(html.Div):
             size="xl",
             fz="h1",
             fw="500"
-        )
-
-        link_to_analytics = dmc.Anchor(
-            href="https://engineering.uiowa.edu/",
-            target="_blank",
-            children=dmc.Center(
-                [
-                    dmc.Box("view analytics", ml=5),
-                    DashIconify(
-                        icon="tabler:arrow-right",
-                        width=12,
-                        height=12,
-                    ),
-                ],
-                inline=True,
-            ),
         )
 
         layout = dmc.Card(
@@ -122,22 +110,11 @@ class ThermostatCardAIO(html.Div):
                             value
                         ],
                         justify="center",
-                        align="center"
+                        align="center",
+                        h="200px",
+                        mb="30"
                     )
                 ),
-
-                # bottom: link to more stats
-                dmc.CardSection(
-                    dmc.Group(
-                        [
-                            link_to_analytics
-                        ],
-                        justify="end",
-                        align="center",
-                        px="md",
-                        py="sm"
-                    ),
-                )
             ],
             withBorder=True,
             w=300
@@ -153,7 +130,7 @@ class ThermostatCardAIO(html.Div):
             Output(ids.thermometer(MATCH), 'min'),
             Output(ids.thermometer(MATCH), 'max'),
             Output(ids.thermometer(MATCH), 'color'),
-            # Output(ids.thermometer(MATCH), 'scale'),
+            Output(ids.thermometer(MATCH), 'scale'),
 
             # reading
             Output(ids.value(MATCH), 'children'),
@@ -164,29 +141,25 @@ class ThermostatCardAIO(html.Div):
         ],
         [
             Input(ids.segmented_control(MATCH), 'value'),
-            Input("theme", 'value'),
+            Input("theme", "checked")
         ]
     )
     def update_thermostat_card(segment, checked):
         # TODO: stream to this and set the value depending on its physical state
 
         unit = "c"
-        if unit == "c":
-            thermometer_min = 0
-            thermometer_max = 50
 
-        elif unit == "f":
-            thermometer_min = 32
-            thermometer_max = 122
+        range = RANGE_C if unit.lower() == "c" else RANGE_F
+        thermometer_min = range[0]
+        thermometer_max = range[-1]
+        color = "#C9C9C9" if checked else "#454545"     # hardcoding as this component isnt managed by dmc
 
-        color = "white" if checked else "black"
-
-        scale = {
-            'start': thermometer_min,
-            'interval': 10,
-            'end': thermometer_max,
+        thermometer_scale = {
+            "custom": {
+                val: {"label": str(val), "style": {"color": color}}
+                for val in range
+            }
         }
-
 
         # ON
         if segment == "ON":
@@ -218,7 +191,7 @@ class ThermostatCardAIO(html.Div):
             thermometer_min,
             thermometer_max,
             thermometer_color,
-            # scale,
+            thermometer_scale,
 
             reading,
 

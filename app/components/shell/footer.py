@@ -1,76 +1,110 @@
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 from dash import Output, Input, callback, html, get_asset_url
-import dash_bootstrap_components as dbc
 from dash import Dash, Input, Output,  clientside_callback
 
-def footer():
-    # class_notice = dmc.Center(
-    #     [
-    #         dmc.Text(
-    #             "Principles of ECE/CSE Design Fall 2025",
-    #             fz="md",
-    #         ),
-    #         dmc.Text(
-    #             "•",
-    #             style={
-    #                 "marginLeft": "0.5em",
-    #                 "marginRight": "0.5em"
-    #             }
-    #         ),
-    #         dmc.Text(
-    #             "Labratory 1",
-    #             fz="md"
-    #         ),
-    #     ]
-    # )
+def build_footer_col(label: str, links: dict):
+    label_component = dmc.Text(
+        children=label,
+        size="lg",
+        fw="700"
+    )
+
+    nested = [
+        dmc.Anchor(
+            href=val,
+            target="_blank",
+            children=key,
+            size="sm"
+        )
+        for key, val in links.items()
+    ]
 
     return dmc.Stack(
         [
-            html.Div(
-                [
-                    DashIconify(
-                        icon="mdi:heart-outline",
-                        color="red",
-                        width=14
-                    ),
-                    dmc.Text(
-                        "Dashboard Created by Team 3",
-                        fz="sm",
-                        style={
-                            "font-style": "italic",
-                        },
-                    ),
-                ],
-                style={
-                    "display":"flex",
-                    "gap": "0.5em",
-                    "align-items": "center"
-                }
-            ),
-            dmc.Center(
-                dmc.Anchor(
-                    href="https://engineering.uiowa.edu/",
-                    target="_blank",
-                    children=dmc.Center(
-                        [
-                            dmc.Box("University of Iowa, College of Engineering", ml=5),
-                            DashIconify(
-                                icon="lsicon:export-filled",
-                                width=12,
-                                height=12,
-                            ),
-                        ],
-                        inline=True,
-                    ),
-                )
+            label_component,
+            dmc.Stack(
+                nested,
+                gap="sm" 
             )
         ],
-        justify="center",
-        align="center",
+        justify="start",
+        align="start",
+        mx="sm"
+    )
+
+
+LINKEDIN_LINKS = {
+    "Steven Austin": "https://wwww.linkedin.com/in/steven-austin-does-not-have-a-linked-in",
+    "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
+    "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
+    "Zack Mulholland": "https://www.linkedin.com/in/zack-mulholland-317914254/",
+}
+
+DOCUMENTATION_LINKS = {
+    "Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
+    "Dashboard Code": "https://github.com/Senior-Design-2025-2026",
+    "Embedded Code": "https://github.com/Senior-Design-2025-2026",
+    "Lab Report": "./404",
+}
+
+OTHER_PROJECTS_LINKS = {
+    "Lab 1 (Thermometer)": "./404",
+    "Lab 2 (TBD)": "./404",
+    "Lab 3 (TBD)": "./404",
+    "Final (TBD)": "./404",
+}
+
+linked_in_col = build_footer_col("Team Members", LINKEDIN_LINKS)
+documentation_col = build_footer_col("Documentation", DOCUMENTATION_LINKS)
+other_projects = build_footer_col("Our Projects", OTHER_PROJECTS_LINKS)
+
+university_statement = dmc.Card(
+    dmc.Stack(
+        [
+            dmc.Stack(
+                [
+                    dmc.Text(
+                        children="Team 3",
+                        size="30px",
+                        fw="900"
+                    ),
+                    dmc.Badge(
+                        "ECE Senior Design • Lab 1",
+                    ),
+                ],
+                gap="sm"
+            ),
+            dmc.Text(
+                children="""
+                Principles of ECE/CSE Design Fall 2025.
+                University of Iowa, College of Engineering. 
+                """,
+                size="sm",
+                fs="italic",
+                maw="200px"
+            ),
+        ],
+    )
+)
+
+def footer():
+    external_links = dmc.Box(
+            dmc.Group(
+            [
+                university_statement,
+                documentation_col,
+                linked_in_col,
+                other_projects,
+            ], 
+            justify="space-evenly",
+            align="start",
+            wrap="wrap",
+            py="md"
+        ),
         style={
-            "display":"flex",
-            "flex-direction":"column",
-            "margin": "1em"
+            "border-top":"1px solid var(--app-shell-border-color)",
         }
     )
+
+    return external_links
