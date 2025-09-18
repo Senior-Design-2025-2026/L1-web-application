@@ -61,17 +61,6 @@ app.layout = html.Div([
     footer
 ])
 
-# me = "email@uiowa.edu"
-# you = "email@uiowa.edu"
-
-# msg = MIMEText("Test Email Message")
-# msg["Subject"] = "Test Email"
-# msg["From"] = me
-# msg["To"] = you
-
-# with smtplib.SMTP("ns-mx.uiowa.edu", 25) as server:
-#     server.sendmail(me, [you], msg.as_string())
-
 
 # ---------------- DB CONNECTION ---------------- #
 db_path = "app/db_conn/Lab1.db"
@@ -94,6 +83,23 @@ def getTemperatureData():
     # Append new temperature data to the last row
     dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = int(tempData["sensor1Temperature"])
     dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = int(tempData["sensor2Temperature"])
+
+    if (int(tempData["sensor1Temperature"]) > dashboard_page_obj.threshold):
+        if not dashboard_page_obj.overThreshold:
+            dashboard_page_obj.overThreshold = True
+        else:
+            me = "insertyouremail@uiowa.edu"
+            you = "insertyouremail@uiowa.edu"
+
+            msg = MIMEText("Temperature read over 40 degrees C")
+            msg["Subject"] = "Temperature Over Threshold"
+            msg["From"] = me
+            msg["To"] = you
+
+            with smtplib.SMTP("ns-mx.uiowa.edu", 25) as server:
+                server.sendmail(me, [you], msg.as_string())
+    else:
+        dashboard_page_obj.overThreshold = False
 
     return "Success", 200
 

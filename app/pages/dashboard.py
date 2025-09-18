@@ -34,6 +34,9 @@ class DashboardPage:
         self.min2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="min", test_df=self.df)
         self.max2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="max", test_df=self.df)
 
+        self.threshold = 40
+        self.overThreshold = False
+
 
         if app is not None:
             self.callbacks()
