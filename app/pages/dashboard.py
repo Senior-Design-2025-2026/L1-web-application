@@ -37,6 +37,11 @@ class DashboardPage:
         self.threshold = 40
         self.overThreshold = False
 
+        # Fields so the app can see the status and communicate with the sensor program
+        self.unit = "c"
+        self.sensor1On = True
+        self.sensor2On = True
+
 
         if app is not None:
             self.callbacks()
@@ -153,5 +158,8 @@ class DashboardPage:
             # TODO get the global df from redis
             line_chart = create_chart(df=self.df, time_unit=time_u, temp_unit=temp_u)
             # todo, other charts: time, min, max, avg
+
+            # Update the member variable
+            self.unit = temp_u
 
             return line_chart

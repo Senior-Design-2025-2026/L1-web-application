@@ -1,7 +1,6 @@
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
-from flask import Flask
-from flask import request
+from flask import Flask, request, jsonify
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
@@ -81,10 +80,10 @@ def getTemperatureData():
     dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(-1)
     
     # Append new temperature data to the last row
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = int(tempData["sensor1Temperature"])
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = int(tempData["sensor2Temperature"])
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = None if tempData["sensor1Temperature"] == None else int(tempData["sensor1Temperature"])
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = None if tempData["sensor2Temperature"] == None else int(tempData["sensor2Temperature"])
 
-    if (int(tempData["sensor1Temperature"]) > dashboard_page_obj.threshold):
+    if (tempData["sensor1Temperature"] != None and int(tempData["sensor1Temperature"]) > dashboard_page_obj.threshold):
         if not dashboard_page_obj.overThreshold:
             dashboard_page_obj.overThreshold = True
         else:
@@ -101,7 +100,11 @@ def getTemperatureData():
     else:
         dashboard_page_obj.overThreshold = False
 
-    return "Success", 200
+    return jsonify([
+                dashboard_page_obj.unit,
+                dashboard_page_obj.sensor1On,
+                dashboard_page_obj.sensor1On
+            ]), 200
 
 
 @app.callback(
