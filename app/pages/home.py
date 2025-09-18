@@ -8,17 +8,10 @@ class HomePage:
         self.db = None
 
     def layout(self):
-        # TODO:
-        # Home Page should consist of 2 simple visuals  
-        #   on laptop: flex horiz
-        #   on phone: flex vert
-        # These are cards with thermometers 
-        # within the button there should be an indicator for off/on
-        # card has action button to expand to a larger visuals?
         cards = dmc.Stack(
             [
                 ThermostatCardAIO("Sensor 1"),
-                ThermostatCardAIO("Sensor 1"),
+                ThermostatCardAIO("Sensor 2"),
             ],
             justify="center",
             align="center"
@@ -35,13 +28,12 @@ class HomePage:
 
         line_chart = dmc.Card(
             dmc.LineChart(
-                h=300,
-                w=500,
+                h=550,
+                w=900,
                 dataKey="date",
                 data=data,
                 series = [
                     {"name": "Apples", "color": "indigo.6"},
-                    {"name": "Oranges", "color": "blue.6"},
                     {"name": "Tomatoes", "color": "teal.6"}
                 ],
                 curveType="Linear",
@@ -50,7 +42,10 @@ class HomePage:
                 withXAxis="True",
                 withYAxis="True",
                 withDots="True",
-            )
+                yAxisLabel="Temperature °Y",
+                xAxisLabel="s"
+            ),
+            withBorder=True,
         )
 
         home = dmc.Group(
@@ -61,7 +56,3 @@ class HomePage:
         )
 
         return home
-
-
-
-    
