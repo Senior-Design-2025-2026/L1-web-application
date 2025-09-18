@@ -1,4 +1,4 @@
-from dash import html, callback, Output, Input
+from dash import html, callback, Output, Input, dcc
 
 import pandas as pd
 
@@ -7,16 +7,16 @@ from components.SensorCard import SensorCard
 from visuals.temperature_chart import create_chart
 from visuals.StatCard import StatCard
 
-# TODO REMOVE (TESTING DATAFRAME)
-TESTING = pd.DataFrame({
-    "id": [1]*10 + [2]*10,
-    "time": list(range(10)) + list(range(10)),
-    "temperature": [5 + i for i in range(10)] + [18 + i*3 for i in range(10)]
-})
-
 class DashboardPage:
     def __init__(self, app):
         self.app = app
+
+        self.df = pd.DataFrame({
+            "id": [1]*301,
+            "time": list(range(301)),
+            "temperatureSensor1Data": [20 for _ in range(301)],
+            "temperatureSensor2Data": [None for _ in range(301)]
+        })
 
         # SENSOR CARDS
         self.tc1 = SensorCard(app, sensor_id=1)
@@ -26,19 +26,29 @@ class DashboardPage:
         self.tc2.create()
 
         # STAT CARDS
-        self.avg1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="avg", test_df=TESTING)
-        self.min1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="min", test_df=TESTING)
-        self.max1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="max", test_df=TESTING)
+        self.avg1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="avg", test_df=self.df)
+        self.min1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="min", test_df=self.df)
+        self.max1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="max", test_df=self.df)
 
-        self.avg2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="avg", test_df=TESTING)
-        self.min2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="min", test_df=TESTING)
-        self.max2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="max", test_df=TESTING)
+        self.avg2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="avg", test_df=self.df)
+        self.min2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="min", test_df=self.df)
+        self.max2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="max", test_df=self.df)
+
+        self.threshold = 40
+        self.overThreshold = False
+
+        # Fields so the app can see the status and communicate with the sensor program
+        self.unit = "c"
+        self.sensor1On = True
+        self.sensor2On = True
 
 
         if app is not None:
             self.callbacks()
 
     def layout(self) -> html.Div:
+        refresh_interval = dcc.Interval(id="interval", interval=1000, n_intervals=0)
+
         time_dropdown = dropdown_builder(
             label="Time",
             id="time-dropdown",
@@ -62,9 +72,9 @@ class DashboardPage:
 
         dropdown_container = flex_builder(
             direction="row",
-            children=[temp_dropdown, time_dropdown],
+            children=[refresh_interval, temp_dropdown, time_dropdown],
             size="md",
-        )
+        )  
 
         # VISUALS
         sensor_card_1 = self.tc1.render()
@@ -141,11 +151,15 @@ class DashboardPage:
             Output("line-chart", "children"),
             Input("time-dropdown", "value"),
             Input("temp-dropdown", "value"),
+            Input("interval", "n_intervals"),
         )
-        def update_visuals(time_u, temp_u):
+        def update_visuals(time_u, temp_u, _):
 
             # TODO get the global df from redis
-            line_chart = create_chart(df=TESTING, time_unit=time_u, temp_unit=temp_u)
+            line_chart = create_chart(df=self.df, time_unit=time_u, temp_unit=temp_u)
             # todo, other charts: time, min, max, avg
+
+            # Update the member variable
+            self.unit = temp_u
 
             return line_chart

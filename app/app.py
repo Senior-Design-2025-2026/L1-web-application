@@ -1,10 +1,15 @@
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
-from flask import Flask
+from flask import Flask, request, jsonify
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
 from components.footer import footer
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 # from db_conn.db_methods import DBConnection
 
@@ -24,9 +29,9 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
         dbc.NavItem(dbc.NavLink("Settings", href="/settings"))
     ],
-    brand="ECE Senior Design Lab 1: Temperature System",
+    brand="Lab 1",
     brand_href="/",
-    color="secondary",
+    color="primary",
     dark=True
 )
 
@@ -40,10 +45,9 @@ linkedIn_links = {
 }
 
 project_links = {
-    "Project Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
-    "Team Github": "https://github.com/Senior-Design-2025-2026",
+    "Github": "https://github.com/Senior-Design-2025-2026",
     "Server Code": "https://github.com/Senior-Design-2025-2026/L1-web-server",
-    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat",
+    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat"
 }
 
 footer = footer(project_links=project_links, linkedIn_links=linkedIn_links)
@@ -66,6 +70,43 @@ dashboard_page_obj = DashboardPage(app)
 settings_page_obj  = SettingsPage(app)
 
 # ----------------- APP ROUTING ----------------- #   
+@server.route('/temperatureData', methods = ['POST'])
+def getTemperatureData():
+
+    tempData = request.get_json()
+
+    # Shift temperature columns up to remove oldest data (first row)
+    dashboard_page_obj.df["temperatureSensor1Data"] = dashboard_page_obj.df["temperatureSensor1Data"].shift(-1)
+    dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(-1)
+    
+    # Append new temperature data to the last row
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = None if tempData["sensor1Temperature"] == None else int(tempData["sensor1Temperature"])
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = None if tempData["sensor2Temperature"] == None else int(tempData["sensor2Temperature"])
+
+    if (tempData["sensor1Temperature"] != None and int(tempData["sensor1Temperature"]) > dashboard_page_obj.threshold):
+        if not dashboard_page_obj.overThreshold:
+            dashboard_page_obj.overThreshold = True
+        else:
+            me = "insertyouremail@uiowa.edu"
+            you = "insertyouremail@uiowa.edu"
+
+            msg = MIMEText("Temperature read over 40 degrees C")
+            msg["Subject"] = "Temperature Over Threshold"
+            msg["From"] = me
+            msg["To"] = you
+
+            with smtplib.SMTP("ns-mx.uiowa.edu", 25) as server:
+                server.sendmail(me, [you], msg.as_string())
+    else:
+        dashboard_page_obj.overThreshold = False
+
+    return jsonify([
+                dashboard_page_obj.unit,
+                dashboard_page_obj.sensor1On,
+                dashboard_page_obj.sensor1On
+            ]), 200
+
+
 @app.callback(
     Output('page-content', 'children'),
     Input('url', 'pathname')
@@ -79,4 +120,4 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    app.run(debug=True, port="8050")
+    app.run(debug=True, port=8050)
