@@ -1,10 +1,16 @@
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 from flask import Flask
+from flask import request
 
 from pages.dashboard import DashboardPage
 from pages.settings import SettingsPage
 from components.footer import footer
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 # from db_conn.db_methods import DBConnection
 
@@ -24,9 +30,9 @@ navbar = dbc.NavbarSimple(
         dbc.NavItem(dbc.NavLink("Dashboard", href="/dashboard")),
         dbc.NavItem(dbc.NavLink("Settings", href="/settings"))
     ],
-    brand="ECE Senior Design Lab 1: Temperature System",
+    brand="Lab 1",
     brand_href="/",
-    color="secondary",
+    color="primary",
     dark=True
 )
 
@@ -40,10 +46,9 @@ linkedIn_links = {
 }
 
 project_links = {
-    "Project Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
-    "Team Github": "https://github.com/Senior-Design-2025-2026",
+    "Github": "https://github.com/Senior-Design-2025-2026",
     "Server Code": "https://github.com/Senior-Design-2025-2026/L1-web-server",
-    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat",
+    "Embedded Code": "https://github.com/Senior-Design-2025-2026/L1-embedded-thermostat"
 }
 
 footer = footer(project_links=project_links, linkedIn_links=linkedIn_links)
@@ -56,6 +61,17 @@ app.layout = html.Div([
     footer
 ])
 
+# me = "email@uiowa.edu"
+# you = "email@uiowa.edu"
+
+# msg = MIMEText("Test Email Message")
+# msg["Subject"] = "Test Email"
+# msg["From"] = me
+# msg["To"] = you
+
+# with smtplib.SMTP("ns-mx.uiowa.edu", 25) as server:
+#     server.sendmail(me, [you], msg.as_string())
+
 
 # ---------------- DB CONNECTION ---------------- #
 db_path = "app/db_conn/Lab1.db"
@@ -66,6 +82,22 @@ dashboard_page_obj = DashboardPage(app)
 settings_page_obj  = SettingsPage(app)
 
 # ----------------- APP ROUTING ----------------- #   
+@server.route('/temperatureData', methods = ['POST'])
+def getTemperatureData():
+
+    tempData = request.get_json()
+
+    # Shift temperature columns up to remove oldest data (first row)
+    dashboard_page_obj.df["temperatureSensor1Data"] = dashboard_page_obj.df["temperatureSensor1Data"].shift(-1)
+    dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(-1)
+    
+    # Append new temperature data to the last row
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = int(tempData["sensor1Temperature"])
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = int(tempData["sensor2Temperature"])
+
+    return "Success", 200
+
+
 @app.callback(
     Output('page-content', 'children'),
     Input('url', 'pathname')
@@ -79,4 +111,4 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    app.run(debug=True, port="8050")
+    app.run(debug=True, port=8050)

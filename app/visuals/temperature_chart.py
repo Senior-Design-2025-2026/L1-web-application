@@ -8,7 +8,7 @@ def plot_sensor_trace(fig: go.Figure, df: pd.DataFrame, id: int, line: dict):
     fig.add_trace(
         go.Scatter(
             x=sensor_df["time"],
-            y=sensor_df["temperature"],
+            y=sensor_df["temperatureSensor1Data"],
             mode="lines",
             name=f"Sensor {id}",
             line=line
