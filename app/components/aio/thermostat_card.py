@@ -9,10 +9,6 @@ RANGE_C = [0, 10, 20, 30, 40, 50]
 RANGE_F = [32, 50, 68, 86, 104, 122]
 
 class ThermostatCardAIO(html.Div):
-    """
-    - text: name of sensor 
-    - aio_id: id name
-    """
     class ids:
         segmented_control = lambda aio_id: {
             "component": "ThermostatCardAIO",
@@ -47,11 +43,10 @@ class ThermostatCardAIO(html.Div):
     ):
         if aio_id is None:
             aio_id = str(uuid.uuid4())
-        
-        self.text = text
 
+        # ======== CARD TITLE ======== 
         label = dmc.Text(
-            self.text,
+            text,
             size="xl",
             fw=700
         )
@@ -141,7 +136,7 @@ class ThermostatCardAIO(html.Div):
         ],
         [
             Input(ids.segmented_control(MATCH), 'value'),
-            Input("theme", "checked")
+            Input("theme", "checked"),
         ]
     )
     def update_thermostat_card(segment, checked):

@@ -1,4 +1,4 @@
-from dash import html
+from dash import html, Input
 import dash_mantine_components as dmc
 
 from components.aio.thermostat_card import ThermostatCardAIO
@@ -8,6 +8,22 @@ class HomePage:
         self.db = None
 
     def layout(self):
+        dropdown = dmc.Select(
+            label="Select your favorite library",
+            placeholder="Select one",
+            id="framework-select",
+            value="pd",
+            data=[
+                {"value": "pd", "label": "Pandas"},
+                {"value": "np", "label": "NumPy"},
+                {"value": "tf", "label": "TensorFlow"},
+                {"value": "torch", "label": "PyTorch"},
+            ],
+            w=200,
+            mb=10,
+        )        
+
+
         cards = dmc.Stack(
             [
                 ThermostatCardAIO("Sensor 1"),
@@ -52,7 +68,7 @@ class HomePage:
             [
                 cards,
                 line_chart
-            ]
+            ],
         )
 
         return home

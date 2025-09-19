@@ -39,8 +39,8 @@ app = Dash(
     assets_folder=str(Path.cwd() / "app" / "assets")
 )
 
-home_page_obj      = HomePage(app)
-analytics_page_obj = AnalyticsPage(app)
+home_page_obj           = HomePage(app)
+analytics_page_obj      = AnalyticsPage(app)
 configuration_page_obj  = ConfigurationPage(app)
 
 app.layout = dmc.MantineProvider(
@@ -60,7 +60,7 @@ app.layout = dmc.MantineProvider(
                     "radius": "sm"
                 }
             },
-        }
+        },
     },
     children=[
         dcc.Location(id='url'),
@@ -78,7 +78,7 @@ app.layout = dmc.MantineProvider(
                 dmc.AppShellMain(
                     dmc.Box(
                         id="page-content",
-                        py="md",
+                        py="sm",
                         px="sm",
                     ),
                 ),
