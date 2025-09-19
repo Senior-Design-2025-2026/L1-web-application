@@ -1,21 +1,27 @@
-from dash import html
-from database.db_methods import Users
+from dash import html, Output, Input, callback
 import dash_ag_grid as dag
 import pandas as pd
 
+from database.db_methods import DB, User, Temperature
+
 class SettingsPage:
-    def __init__(self, users: Users):
-        self.Users = users
+    def __init__(self, db: DB):
+        self.DB = db
 
     def layout(self) -> html.Div:
-        users_res = self.Users.get_all_users()
-        print(r for r in users_res)
-        df = pd.DataFrame(users_res, columns=[users_res.columns])
-        print(df)
+        users_df = self.DB.get_all_users()
 
         table = dag.AgGrid(
-            rowData=df.to_dict("records"),
-            columnDefs=[{"field": i} for i in df.columns]
+            rowData=users_df.to_dict(orient="records"),
+            columnDefs=[{"field": i} for i in users_df.columns],
+            id="dag-users"
         )
 
         return table
+
+    @callback(
+        Output("dag-users", "className"),
+        Input("theme", "checked"),
+    )
+    def update_theme(switch_on):
+        return "ag-theme-alpine-dark" if switch_on else "ag-theme-alpine"

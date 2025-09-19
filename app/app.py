@@ -12,7 +12,7 @@ from pages.settings import SettingsPage
 from components.shell.header import header
 from components.shell.footer import footer
 
-from database.db_methods import Users, Readings
+from database.db_methods import DB
 
 # ===================================================
 #                 SYSTEM CLOCK 
@@ -28,8 +28,7 @@ INTERVAL = 1
 # (see db_orm and db_methods for implementation details)
 # docs: https://www.sqlalchemy.org/
 db_path = "app/database/lab1.db"
-UsersConn    = Users(db_path=db_path)
-ReadingsConn = Readings(db_path=db_path)
+DB = DB(db_path=db_path)
 
 # ===================================================
 #                 DASH APPLICATION
@@ -40,12 +39,13 @@ ReadingsConn = Readings(db_path=db_path)
 
 app = Dash(
     name="ECE Senior Design Lab 1", 
-    assets_folder=str(Path.cwd() / "app" / "assets")
+    assets_folder=str(Path.cwd() / "app" / "assets"),
+    suppress_callback_exceptions=True
 )
 
-home_page_obj      = HomePage(readings=ReadingsConn)
-analytics_page_obj = AnalyticsPage()
-settings_page_obj  = SettingsPage(users=UsersConn)
+home_page_obj      = HomePage(db=DB)
+analytics_page_obj = AnalyticsPage(db=DB)
+settings_page_obj  = SettingsPage(db=DB)
 
 app.layout = dmc.MantineProvider(
     theme={
