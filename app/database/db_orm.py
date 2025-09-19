@@ -3,6 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 from typing import Optional
 
+# ================================================== SQL ALCHEMY ================================================== 
+# this is a super easy to use python package for handling transactional database connections agnostically using OOP
+# docs: https://www.sqlalchemy.org/
+
 # ================= BASE  ==================
 # this classname doesnt need to be "Base", 
 # however, passing DeclarativeBase (via orm)
@@ -58,10 +62,22 @@ class User(Base):
         return f"<user_configurations(user_id={self.user_id}, name={self.name}, phone_num={self.phone_num}, email_addr={self.email_addr}>"
 
 if __name__ == "__main__":
+    print("RUNNING")
     engine = create_engine("sqlite:///lab1.db", echo=True)
 
     tables: list[Base] = [Temperature(), User()]
 
-    # --- pls dont drop all :)              
-    # Base.metadata.drop_all(engine)          
-    # Base.metadata.create_all(engine)          
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+
+    matt = User(
+        name="Matt",
+        phone_num="6087973815",
+        email_addr="mnkrueger@uiowa.edu"
+    )
+
+    with Session(engine) as session:
+        session.add(matt)
+        session.commit()
+
+    # temperatures will be added the same way. see "db_methods.py" for classes

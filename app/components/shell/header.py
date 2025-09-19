@@ -11,7 +11,7 @@ LOGO_LIGHT = "iowa-black.png"
 PAGE_LINKS= {
     "Home": "mdi:home-outline",    
     "Analytics": "raphael:temp",
-    "Configuration": "material-symbols:mail-outline",
+    "Settings": "tabler:settings",
 }
 
 # ----- build menu items ---- #

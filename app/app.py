@@ -7,10 +7,12 @@ from pathlib import Path
 
 from pages.home import HomePage
 from pages.analytics import AnalyticsPage
-from pages.configuration import ConfigurationPage
+from pages.settings import SettingsPage
 
 from components.shell.header import header
 from components.shell.footer import footer
+
+from database.db_methods import Users, Readings
 
 # ===================================================
 #                 SYSTEM CLOCK 
@@ -22,10 +24,12 @@ INTERVAL = 1
 # ===================================================
 #                 DATABASE OBJECT
 # ===================================================
-# using sqlalchemy to handle r/w with database
+# using sqlalchemy to handle crudding
+# (see db_orm and db_methods for implementation details)
 # docs: https://www.sqlalchemy.org/
-db_path = "app/db_conn/Lab1.db"
-# db_conn = DBConnection(db_path=db_path)
+db_path = "app/database/lab1.db"
+UsersConn    = Users(db_path=db_path)
+ReadingsConn = Readings(db_path=db_path)
 
 # ===================================================
 #                 DASH APPLICATION
@@ -39,9 +43,9 @@ app = Dash(
     assets_folder=str(Path.cwd() / "app" / "assets")
 )
 
-home_page_obj           = HomePage(app)
-analytics_page_obj      = AnalyticsPage(app)
-configuration_page_obj  = ConfigurationPage(app)
+home_page_obj      = HomePage(readings=ReadingsConn)
+analytics_page_obj = AnalyticsPage()
+settings_page_obj  = SettingsPage(users=UsersConn)
 
 app.layout = dmc.MantineProvider(
     theme={
@@ -98,8 +102,8 @@ def display_page(pathname):
         return home_page_obj.layout()
     elif pathname == '/analytics':
         return analytics_page_obj.layout()
-    elif pathname == '/configuration':
-        return configuration_page_obj.layout()
+    elif pathname == '/settings':
+        return settings_page_obj.layout()
     else:
         return html.Div("404 Page Not Found")
 

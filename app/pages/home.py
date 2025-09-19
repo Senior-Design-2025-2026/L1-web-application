@@ -2,10 +2,11 @@ from dash import html, Input
 import dash_mantine_components as dmc
 
 from components.aio.thermostat_card import ThermostatCardAIO
+from database.db_methods import Readings
 
 class HomePage:
-    def __init__(self, db: str = None):
-        self.db = None
+    def __init__(self, readings: Readings):
+        self.Readings = readings
 
     def layout(self):
         dropdown = dmc.Select(
