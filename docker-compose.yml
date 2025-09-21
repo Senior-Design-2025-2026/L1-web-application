@@ -1,0 +1,20 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6397"
+
+  dash_app:
+    build: ./app
+    container_name: web_server
+    ports: 
+      - "8050:8050"
+    depends_on:
+      - redis
+
+  test_env:
+    build: ./test_env/
+    container_name: test_producer
+    depends_on:
+      - redis

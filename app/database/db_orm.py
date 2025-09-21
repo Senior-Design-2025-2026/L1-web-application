@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine, func, Integer, String, DateTime, Float, UniqueConstraint, select, update, Result
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
+from datetime import datetime, timedelta
+
 from typing import Optional
 
 # ================================================== SQL ALCHEMY ================================================== 
@@ -76,8 +78,31 @@ if __name__ == "__main__":
         email_addr="mnkrueger@uiowa.edu"
     )
 
+    user1 = User(
+        name="user1",
+        phone_num="abcdefg",
+        email_addr="hello@gmail.com"
+    )
+
     with Session(engine) as session:
         session.add(matt)
+        session.add(user1)
         session.commit()
 
-    # temperatures will be added the same way. see "db_methods.py" for classes
+
+    
+    dummy_data = [
+        {"sensor_id": 1, "timestamp": datetime.now(), "temperature_c": 21.5},
+        {"sensor_id": 2, "timestamp": datetime.now() + timedelta(minutes=5), "temperature_c": 22.0},
+        {"sensor_id": 3, "timestamp": datetime.now() + timedelta(minutes=10), "temperature_c": 20.8},
+        {"sensor_id": 4, "timestamp": datetime.now() + timedelta(minutes=15), "temperature_c": 23.1},
+        {"sensor_id": 5, "timestamp": datetime.now() + timedelta(minutes=20), "temperature_c": 19.9},
+    ]
+
+    with Session(engine) as session:
+        for row in dummy_data:
+            session.add(Temperature(**row))
+        session.commit()
+
+
+
