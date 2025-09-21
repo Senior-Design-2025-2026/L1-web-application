@@ -43,6 +43,8 @@ app = Dash(
     suppress_callback_exceptions=True
 )
 
+app.title = "Lab 1: ECE Senior Design"
+
 home_page_obj      = HomePage(db=DB)
 analytics_page_obj = AnalyticsPage(db=DB)
 settings_page_obj  = SettingsPage(db=DB)
