@@ -17,6 +17,7 @@ dependencies = [
     "pandas>=2.3.2",
     "plotly-express>=0.4.1",
     "pydantic>=2.11.9",
+    "redis>=6.4.0",
     "rgb>=0.0.3",
     "sqlalchemy>=2.0.43",
 ]

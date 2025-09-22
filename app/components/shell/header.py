@@ -9,8 +9,8 @@ LOGO_DARK = "iowa-gold.png"
 LOGO_LIGHT = "iowa-black.png"
 
 PAGE_LINKS= {
-    "Home": "mdi:home-outline",    
-    "Analytics": "raphael:temp",
+    "Live": "raphael:temp",    
+    "Analytics": "material-symbols:analytics-outline-rounded",
     "Settings": "tabler:settings",
 }
 

@@ -10,4 +10,5 @@ RUN uv sync --frozen
 COPY app ./app
 
 # ============ RUN WITH UV ============
+EXPOSE 8050
 CMD ["uv", "run", "python", "app/app.py"]

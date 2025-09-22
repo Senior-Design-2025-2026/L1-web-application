@@ -1,12 +1,17 @@
-from dash import html, Input
+from dash import html, Input, Output, callback
 import dash_mantine_components as dmc
+import redis
 
 from components.aio.thermostat_card import ThermostatCardAIO
 from database.db_methods import DB, User, Temperature
 
-class HomePage:
-    def __init__(self, db: DB):
+class LivePage:
+    def __init__(self, db: DB, app, stream):
         self.DB = db
+        self.stream = stream
+        
+        if app is None:
+            self.callbacks()
 
     def layout(self):
         dropdown = dmc.Select(
@@ -68,8 +73,22 @@ class HomePage:
         home = dmc.Group(
             [
                 cards,
-                line_chart
+                line_chart,
+                html.Div(id="abcde")
             ],
         )
 
         return home
+
+    def callbacks(self):
+        @callback(
+            [
+                Output("abcde", "children"),
+            ],
+            [
+                Input("system-clock", "n_intervals"),
+            ]
+        )
+        def process_stream(n_intervals):
+            print("PROCESSING INTERVAL")
+            return [""]

@@ -2,10 +2,11 @@ import dash
 from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_renderer
 import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
+import redis
 
 from pathlib import Path
 
-from pages.home import HomePage
+from pages.live import LivePage
 from pages.analytics import AnalyticsPage
 from pages.settings import SettingsPage
 
@@ -13,6 +14,13 @@ from components.shell.header import header
 from components.shell.footer import footer
 
 from database.db_methods import DB
+
+# ===================================================
+#                       REDIS
+# ===================================================
+# we are using redis stream to communicate between the 
+# c/c++ embedded code and the web server.
+temp_stream = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 # ===================================================
 #                 SYSTEM CLOCK 
@@ -27,7 +35,7 @@ INTERVAL = 1
 # using sqlalchemy to handle crudding
 # (see db_orm and db_methods for implementation details)
 # docs: https://www.sqlalchemy.org/
-db_path = "app/database/lab1.db"
+db_path = "app/database/sqlite/lab1.db"
 DB = DB(db_path=db_path)
 
 # ===================================================
@@ -45,9 +53,9 @@ app = Dash(
 
 app.title = "Lab 1: ECE Senior Design"
 
-home_page_obj      = HomePage(db=DB)
-analytics_page_obj = AnalyticsPage(db=DB)
-settings_page_obj  = SettingsPage(db=DB)
+live_page_obj      = LivePage(db=DB, app=app, stream=temp_stream)
+analytics_page_obj = AnalyticsPage(db=DB, app=app)
+settings_page_obj  = SettingsPage(db=DB, app=app)
 
 app.layout = dmc.MantineProvider(
     theme={
@@ -100,8 +108,8 @@ app.layout = dmc.MantineProvider(
     Input('url', 'pathname')
 )
 def display_page(pathname):
-    if pathname == '/' or pathname == '/home':
-        return home_page_obj.layout()
+    if pathname == '/' or pathname == '/live':
+        return live_page_obj.layout()
     elif pathname == '/analytics':
         return analytics_page_obj.layout()
     elif pathname == '/settings':
