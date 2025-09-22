@@ -20,7 +20,11 @@ from database.db_methods import DB
 # ===================================================
 # we are using redis stream to communicate between the 
 # c/c++ embedded code and the web server.
-temp_stream = redis.Redis(host='localhost', port=6379, decode_responses=True)
+temp_stream = redis.Redis(
+        host="redis",
+        port=6379,
+        decode_responses=True
+)
 
 # ===================================================
 #                 SYSTEM CLOCK 

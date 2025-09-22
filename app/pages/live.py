@@ -1,6 +1,8 @@
 from dash import html, Input, Output, callback
 import dash_mantine_components as dmc
 import redis
+import time
+import pandas as pd
 
 from components.aio.thermostat_card import ThermostatCardAIO
 from database.db_methods import DB, User, Temperature
@@ -10,7 +12,7 @@ class LivePage:
         self.DB = db
         self.stream = stream
         
-        if app is None:
+        if app is not None:
             self.callbacks()
 
     def layout(self):
@@ -74,7 +76,8 @@ class LivePage:
             [
                 cards,
                 line_chart,
-                html.Div(id="abcde")
+                html.Div(id="abcde"),
+                html.Div(id="time-curr")
             ],
         )
 
@@ -84,11 +87,17 @@ class LivePage:
         @callback(
             [
                 Output("abcde", "children"),
+                Output("time-curr", "children")
             ],
             [
                 Input("system-clock", "n_intervals"),
             ]
         )
         def process_stream(n_intervals):
-            print("PROCESSING INTERVAL")
-            return [""]
+            print("PROCESS")
+            now_ms = int(time.time() * 1000)
+            prev_5_min = now_ms - 300_000
+
+            readings = self.stream.xrange("readings", min=f"{prev_5_min}-0", max="+")
+
+            print(f"READ~~~{readings}~~~")
