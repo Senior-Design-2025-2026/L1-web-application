@@ -3,6 +3,7 @@ from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_rend
 import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
 import redis
+import os
 
 import time
 
@@ -59,7 +60,7 @@ app = Dash(
 
 app.title = "Lab 1: ECE Senior Design"
 
-live_page_obj      = LivePage(db=DB, app=app, redis=redis)
+live_page_obj      = LivePage(db=DB, app=app)
 analytics_page_obj = AnalyticsPage(db=DB, app=app)
 settings_page_obj  = SettingsPage(db=DB, app=app)
 
@@ -125,9 +126,14 @@ def display_page(pathname):
     else:
         return html.Div("404 Page Not Found")
 
+PORT = os.getenv("DASH_PORT", "8050")
+HOST = os.getenv("HOST", "0.0.0.0")
+
 if __name__ == '__main__':
+
+
     app.run(
         debug=True,
-        port="8050",
-        host="0.0.0.0"            
+        port=PORT,
+        host=HOST            
     )

@@ -8,9 +8,8 @@ from components.aio.thermostat_card import ThermostatCardAIO
 from database.db_methods import DB, User, Temperature
 
 class LivePage:
-    def __init__(self, db: DB, app, stream):
+    def __init__(self, db: DB, app):
         self.DB = db
-        self.stream = stream
         
         if app is not None:
             self.callbacks()
@@ -98,6 +97,6 @@ class LivePage:
             now_ms = int(time.time() * 1000)
             prev_5_min = now_ms - 300_000
 
-            readings = self.stream.xrange("readings", min=f"{prev_5_min}-0", max="+")
+            # readings = self.stream.xrange("readings", min=f"{prev_5_min}-0", max="+")
 
-            print(f"READ~~~{readings}~~~")
+            # print(f"READ~~~{readings}~~~")
