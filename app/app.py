@@ -23,10 +23,10 @@ from database.db_methods import DB
 # ===================================================
 # we are using redis stream to communicate between the 
 # c/c++ embedded code and the web server.
-redis = redis.Redis(
-        host="redis",
-        port=6379,
-        decode_responses=True
+SOCK = os.getenv("SOCK")
+stream = redis.Redis(
+    unix_socket_path=SOCK,
+    decode_responses=True
 )
 
 # ===================================================
@@ -84,7 +84,6 @@ app.layout = dmc.MantineProvider(
         },
     },
     children=[
-        dcc.Store(id="cache"),
         dcc.Location(id='url'),
         dcc.Interval(
             id="system-clock",
@@ -104,6 +103,7 @@ app.layout = dmc.MantineProvider(
                         px="sm",
                     ),
                 ),
+                html.Div(id="recent"),
                 footer()
             ],
             header={"height":60, "width":"100%"},
@@ -111,6 +111,14 @@ app.layout = dmc.MantineProvider(
     ],
 )
 
+@app.callback(
+    Output("recent", "children"),
+    Input("system-clock", "n_intervals")
+)
+def read_stream(n_intervals):
+    reading = stream.xrange("readings", "-", "+")
+    print(reading)
+    return [""]
 
 @app.callback(
     Output('page-content', 'children'),
@@ -129,11 +137,6 @@ def display_page(pathname):
 if __name__ == '__main__':
     PORT = os.getenv("PORT", "8050")
     HOST = os.getenv("HOST", "0.0.0.0")
-
-    print("\n\n")
-    print("HOST", HOST)
-    print("PORT", PORT)
-    print("\n\n")
 
     app.run(
         debug=True,
