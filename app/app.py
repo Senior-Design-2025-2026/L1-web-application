@@ -1,8 +1,10 @@
 import dash
-from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_renderer
+from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_renderer, State
 import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
 import redis
+
+import time
 
 from pathlib import Path
 
@@ -16,11 +18,11 @@ from components.shell.footer import footer
 from database.db_methods import DB
 
 # ===================================================
-#                       REDIS
+#                  REDIS STREAM
 # ===================================================
 # we are using redis stream to communicate between the 
 # c/c++ embedded code and the web server.
-temp_stream = redis.Redis(
+redis = redis.Redis(
         host="redis",
         port=6379,
         decode_responses=True
@@ -57,7 +59,7 @@ app = Dash(
 
 app.title = "Lab 1: ECE Senior Design"
 
-live_page_obj      = LivePage(db=DB, app=app, stream=temp_stream)
+live_page_obj      = LivePage(db=DB, app=app, redis=redis)
 analytics_page_obj = AnalyticsPage(db=DB, app=app)
 settings_page_obj  = SettingsPage(db=DB, app=app)
 
@@ -81,10 +83,11 @@ app.layout = dmc.MantineProvider(
         },
     },
     children=[
+        dcc.Store(id="cache"),
         dcc.Location(id='url'),
         dcc.Interval(
             id="system-clock",
-            interval=(INTERVAL * 1000),                 # in ms... 
+            interval=(INTERVAL * 1000),                 # in ms! 
             n_intervals=0
 
         ),
@@ -106,6 +109,7 @@ app.layout = dmc.MantineProvider(
         )
     ],
 )
+
 
 @app.callback(
     Output('page-content', 'children'),
