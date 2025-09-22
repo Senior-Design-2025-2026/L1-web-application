@@ -126,11 +126,14 @@ def display_page(pathname):
     else:
         return html.Div("404 Page Not Found")
 
-PORT = os.getenv("DASH_PORT", "8050")
-HOST = os.getenv("HOST", "0.0.0.0")
-
 if __name__ == '__main__':
+    PORT = os.getenv("PORT", "8050")
+    HOST = os.getenv("HOST", "0.0.0.0")
 
+    print("\n\n")
+    print("HOST", HOST)
+    print("PORT", PORT)
+    print("\n\n")
 
     app.run(
         debug=True,
