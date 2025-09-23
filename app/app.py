@@ -1,16 +1,12 @@
-import dash
-from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_renderer, State, ctx
+from dash import Dash, html, dcc, Input, Output, ctx
 import dash_mantine_components as dmc
-import dash_bootstrap_components as dbc
 import redis
 import os
 
-import pandas as pd
 from components.aio.thermostat_card import ThermostatCardAIO
 
 from utils.process_stream import process_stream
 
-import time
 
 from pathlib import Path
 

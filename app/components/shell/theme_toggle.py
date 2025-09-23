@@ -1,6 +1,6 @@
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
-from dash import Dash, Input, Output,  clientside_callback
+from dash import Input, Output,  clientside_callback
 
 theme_toggle = dmc.Switch(
     offLabel=DashIconify(icon="radix-icons:sun", width=15, color=dmc.DEFAULT_THEME["colors"]["yellow"][8]),

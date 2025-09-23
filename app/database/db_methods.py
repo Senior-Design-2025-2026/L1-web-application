@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, func, select, update, delete, insert
+from sqlalchemy import create_engine, select, update, delete
 from sqlalchemy.orm import Session
 import pandas as pd
 

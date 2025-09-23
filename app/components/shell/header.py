@@ -1,9 +1,7 @@
 import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 from dash import Output, Input, callback, html, get_asset_url
-import dash_bootstrap_components as dbc
 from components.shell.theme_toggle import theme_toggle
-from dash import Dash, Input, Output,  clientside_callback
 
 LOGO_DARK = "iowa-gold.png"
 LOGO_LIGHT = "iowa-black.png"

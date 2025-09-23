@@ -1,7 +1,4 @@
 import dash_mantine_components as dmc
-from dash_iconify import DashIconify
-from dash import Output, Input, callback, html, get_asset_url
-from dash import Dash, Input, Output,  clientside_callback
 
 def build_footer_col(label: str, links: dict):
     label_component = dmc.Text(

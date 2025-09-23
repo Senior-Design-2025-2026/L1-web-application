@@ -1,9 +1,8 @@
-from dash import html, Output, Input, callback, no_update
+from dash import html, Output, Input, callback
 import dash_ag_grid as dag
-import pandas as pd
 import dash_mantine_components as dmc
 
-from database.db_methods import DB, User, Temperature
+from database.db_methods import DB
 
 class SettingsPage:
     def __init__(self, app, db: DB):

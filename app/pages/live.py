@@ -1,16 +1,17 @@
-from dash import html, Input, Output, callback, State
+from dash import Input, Output, callback
 import dash_mantine_components as dmc
-import redis
-import time
 import pandas as pd
 from io import StringIO
-from utils.temperature_utils import c_to_f
+from utils.temperature_utils import c_to_f, c_to_k
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
 from components.aio.thermostat_card import ThermostatCardAIO
-from database.db_methods import DB, User, Temperature
+from database.db_methods import DB
+
+SENSOR_1_COLOR = "#e85d04"
+SENSOR_2_COLOR = "#ffba08"
 
 class LivePage:
     def __init__(self, db: DB, app, redis=None):
@@ -40,8 +41,8 @@ class LivePage:
         #               card_1 = ThermostatCardAIO("Sensor 1", aio_id="1"),
         #                                                                ~~~
         # DO NOT HAVE TRAILING "," this creates a tuple like so (ThemostatCardAIO, )
-        card_1 = ThermostatCardAIO("Sensor 1", aio_id="1")
-        card_2 = ThermostatCardAIO("Sensor 2", aio_id="2")
+        card_1 = ThermostatCardAIO("Sensor 1", aio_id="1", color=SENSOR_1_COLOR)
+        card_2 = ThermostatCardAIO("Sensor 2", aio_id="2", color=SENSOR_2_COLOR)
 
         cards = dmc.Stack(
             [
@@ -60,8 +61,8 @@ class LivePage:
                 w=900,
                 data=[],
                 series=[
-                    {"name": "Sensor 1", "color": "#e85d04"},
-                    {"name": "Sensor 2", "color": "#ffba08"},
+                    {"name": "Sensor 1", "color": SENSOR_1_COLOR},
+                    {"name": "Sensor 2", "color": SENSOR_2_COLOR},
                 ],
                 dataKey="date",
                 curveType="Linear",
@@ -80,19 +81,22 @@ class LivePage:
             withBorder=True,
         )
 
-        segment = dmc.SegmentedControl(
-            id="unit-segment",
+        segment = dmc.Select(
+            id="unit-dropdown",
             data=[
-                {"value": "c", "label": "Celcius °C"},
-                {"value": "f", "label": "Fahrenheit °F"},
+                {"value": "c", "label": "Celcius (°C)"},
+                {"value": "k", "label": "Kelvin (K)"},
+                {"value": "f", "label": "Fahrenheit (°F)"},
             ],
             value="c",
-            size="md"
+            size="md",
+            persistence=True
         )
 
         clear = dmc.Button(
             id="clear-stream",
-            children="Clear"
+            children="Clear",
+            size="md"
         )
 
         home = dmc.Group(
@@ -106,7 +110,7 @@ class LivePage:
                                 dmc.GridCol(dmc.Box(clear), span=2),
                             ],
                             grow=True,
-                            gutter="sm"
+                            gutter="md"
                         ),
 
                         line_chart,
@@ -122,16 +126,20 @@ class LivePage:
             Output("readings-chart", "data"),
             Output("readings-chart", "unit"),
             Input("system-clock", "n_intervals"),
-            Input("unit-segment", "value"),
+            Input("unit-dropdown", "value"),
         )
         def update_chart(n_intervals, unit):
-            b_data = self.red.get("current_df")
-            df = pd.read_json(StringIO(b_data))
+            try:
+                b_data = self.red.get("current_df")
+                df = pd.read_json(StringIO(b_data))
 
-            temperature_cols = ["Sensor 1", "Sensor 2"]
-            if unit == "f":
-                df[temperature_cols] = df[temperature_cols].apply(c_to_f)
-
-            records = df.to_dict("records")
+                temperature_cols = ["Sensor 1", "Sensor 2"]
+                if unit == "f":
+                    df[temperature_cols] = df[temperature_cols].apply(c_to_f)
+                elif unit == "k":
+                    df[temperature_cols] = df[temperature_cols].apply(c_to_k)
+                records = df.to_dict("records")
+            except:
+                records = pd.DataFrame()
 
             return records, f"°{unit.upper()}"

@@ -2,11 +2,12 @@ import dash_mantine_components as dmc
 from dash import Dash, Output, Input, State, html, dcc, callback, MATCH, ctx
 import dash_daq as daq
 from dash_iconify import DashIconify
-from utils.temperature_utils import get_heat_color, c_to_f
+from utils.temperature_utils import c_to_f, c_to_k
 import uuid
 
 RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified
 RANGE_F = [32, 50, 68, 86, 104, 122]
+RANGE_K = [273, 283, 293, 303, 313, 323]
 
 class ThermostatCardAIO(html.Div):
     class ids:
@@ -45,7 +46,8 @@ class ThermostatCardAIO(html.Div):
     def __init__(
             self,
             text,
-            aio_id=None
+            aio_id=None,
+            color="red",
     ):
         if aio_id is None:
             aio_id = str(uuid.uuid4())
@@ -74,6 +76,7 @@ class ThermostatCardAIO(html.Div):
                 id=self.ids.thermometer(aio_id),
                 height=150,
                 width=20,
+                color=color
 
             ),
             id=self.ids.thermometer_div(aio_id)
@@ -131,7 +134,6 @@ class ThermostatCardAIO(html.Div):
             Output(ids.thermometer(MATCH), 'value'),
             Output(ids.thermometer(MATCH), 'min'),
             Output(ids.thermometer(MATCH), 'max'),
-            Output(ids.thermometer(MATCH), 'color'),
             Output(ids.thermometer(MATCH), 'scale'),
 
             # reading
@@ -144,24 +146,32 @@ class ThermostatCardAIO(html.Div):
         [
             Input(ids.segmented_control(MATCH), 'value'),
             Input("theme", "checked"),
+            Input("unit-dropdown", "value"),
             Input(ids.data(MATCH), "data"),
         ]
     )
-    def update_thermostat_card(segment, checked, data):
+    def update_thermostat_card(segment, checked, unit, data):
         if data:
-            temp = data.get("val")
+            temp = float(data.get("val"))
             print(">>>>>")
             print("UPDATE THERMOSTAT CARD", temp)
 
-        # THERMOMETER RESPONSIVENESS
-        unit = "c"
-        range = RANGE_C if unit.lower() == "c" else RANGE_F
+        # range
+        if unit == "c":
+            range = RANGE_C
+        elif unit == "k":
+            range = RANGE_K
+        elif unit == "f":
+            range = RANGE_F
+
         thermometer_min = range[0]
         thermometer_max = range[-1]
-        color = "#C9C9C9" if checked else "#454545"   
+        
+        # scale 
+        scale_color = "#C9C9C9" if checked else "#454545"   
         thermometer_scale = {
             "custom": {
-                val: {"label": str(val), "style": {"color": color}}
+                val: {"label": str(val), "style": {"color": scale_color}}
                 for val in range
             }
         }
@@ -169,13 +179,17 @@ class ThermostatCardAIO(html.Div):
         # IF ON: display
         if segment == "ON":
             hidden = False
-            thermometer_value = 30
-            thermometer_color = get_heat_color(thermometer_value, "c")
 
             if unit == "f":
                 temp = c_to_f(temp)
+                unit = f" °{unit.upper()}"
+            elif unit == "k":
+                temp = c_to_k(temp)
+                unit = "K"
+            else:
+                unit = f" °{unit.upper()}"
 
-            reading = f"{temp} °{unit.upper()}"
+            reading = f"{temp}{unit}"
 
             segment_value = "ON"
             segment_color = "green"
@@ -184,7 +198,6 @@ class ThermostatCardAIO(html.Div):
         else:
             hidden = True
             thermometer_value = 0
-            thermometer_color = "#FFFFFF"
 
             reading = "N/A"
 
@@ -193,10 +206,9 @@ class ThermostatCardAIO(html.Div):
 
         return (
             hidden,
-            thermometer_value,
+            temp,
             thermometer_min,
             thermometer_max,
-            thermometer_color,
             thermometer_scale,
 
             reading,
