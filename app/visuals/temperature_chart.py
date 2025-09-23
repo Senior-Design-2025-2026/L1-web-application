@@ -8,7 +8,7 @@ def plot_sensor_trace(fig: go.Figure, df: pd.DataFrame, id: int, line: dict):
     fig.add_trace(
         go.Scatter(
             x=sensor_df["time"],
-            y=sensor_df["temperatureSensor1Data"],
+            y=sensor_df["temperatureSensor" + str(id) + "Data"],
             mode="lines",
             name=f"Sensor {id}",
             line=line
@@ -17,7 +17,7 @@ def plot_sensor_trace(fig: go.Figure, df: pd.DataFrame, id: int, line: dict):
     
 def create_chart(
         df: pd.DataFrame,
-        temp_unit: str = "c",       # default per embedded side
+        temp_unit: str = "C",       # default per embedded side
         time_unit: str = "s",       # default per this server
 ) -> go.Figure:
     """
@@ -51,8 +51,9 @@ def create_chart(
     plot_sensor_trace(fig, df, 2, line_s2)
 
     fig.update_layout(
-        xaxis_title=f"Time ({time_unit})",
+        xaxis_title=f"Seconds Ago ({time_unit})",
         yaxis_title=f"Temperature ({temp_unit})",
+        yaxis=dict(range=[10, 50]),
         legend_title="Sensor",
         template="simple_white"
     )

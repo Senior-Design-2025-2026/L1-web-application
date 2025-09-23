@@ -13,8 +13,8 @@ class DashboardPage:
 
         self.df = pd.DataFrame({
             "id": [1]*301,
-            "time": list(range(301)),
-            "temperatureSensor1Data": [20 for _ in range(301)],
+            "time": list(reversed(range(301))),
+            "temperatureSensor1Data": [None for _ in range(301)],
             "temperatureSensor2Data": [None for _ in range(301)]
         })
 
@@ -38,7 +38,7 @@ class DashboardPage:
         self.overThreshold = False
 
         # Fields so the app can see the status and communicate with the sensor program
-        self.unit = "c"
+        self.unit = "C"
         self.sensor1On = True
         self.sensor2On = True
 
@@ -51,7 +51,7 @@ class DashboardPage:
 
         time_dropdown = dropdown_builder(
             label="Time",
-            id="time-dropdown",
+            id="time-dropdown", 
             options=[
                 {'label': 'Seconds (s)', 'value': 's'},
                 {'label': 'Minutes (min)', 'value': 'min'},
@@ -64,10 +64,10 @@ class DashboardPage:
             label="Temperature",
             id="temp-dropdown",
             options=[
-                {'label': 'Farenheit (F°)', 'value': 'f'},
-                {'label': 'Celsius (C°)', 'value': 'c'},
+                {'label': 'Farenheit (F°)', 'value': 'F'},
+                {'label': 'Celsius (C°)', 'value': 'C'},
             ],
-            value="c",
+            value="C",
         )
 
         dropdown_container = flex_builder(

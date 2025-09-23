@@ -79,16 +79,18 @@ def getTemperatureData():
     dashboard_page_obj.df["temperatureSensor1Data"] = dashboard_page_obj.df["temperatureSensor1Data"].shift(-1)
     dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(-1)
     
-    # Append new temperature data to the last row
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = None if tempData["sensor1Temperature"] == None else int(tempData["sensor1Temperature"])
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = None if tempData["sensor2Temperature"] == None else int(tempData["sensor2Temperature"])
 
-    if (tempData["sensor1Temperature"] != None and int(tempData["sensor1Temperature"]) > dashboard_page_obj.threshold):
+    print(tempData)
+    # Append new temperature data to the last row
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = None if tempData["sensor1Temperature"] == None else float(tempData["sensor1Temperature"])
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = None if tempData["sensor2Temperature"] == None else float(tempData["sensor2Temperature"])
+
+    if (tempData["sensor1Temperature"] != None and int(tempData["sensor1Temperature"]) > 25):
         if not dashboard_page_obj.overThreshold:
             dashboard_page_obj.overThreshold = True
         else:
-            me = "insertyouremail@uiowa.edu"
-            you = "insertyouremail@uiowa.edu"
+            me = "mnkrueger@uiowa.edu"
+            you = "sage-marks@uiowa.edu"
 
             msg = MIMEText("Temperature read over 40 degrees C")
             msg["Subject"] = "Temperature Over Threshold"
@@ -102,8 +104,8 @@ def getTemperatureData():
 
     return jsonify([
                 dashboard_page_obj.unit,
-                dashboard_page_obj.sensor1On,
-                dashboard_page_obj.sensor1On
+                dashboard_page_obj.tc1._active,
+                dashboard_page_obj.tc2._active
             ]), 200
 
 
@@ -120,4 +122,4 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8050)
+    app.run(debug=True, port=8050, host="0.0.0.0")
