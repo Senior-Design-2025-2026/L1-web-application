@@ -10,6 +10,12 @@ RANGE_F = [32, 50, 68, 86, 104, 122]
 
 class ThermostatCardAIO(html.Div):
     class ids:
+        data = lambda aio_id: {
+            "component": "ThermostatCardAIO",
+            "subcomponent": "data",
+            "aio_id": aio_id
+        }
+
         segmented_control = lambda aio_id: {
             "component": "ThermostatCardAIO",
             "subcomponent": "segmented_control",
@@ -101,6 +107,7 @@ class ThermostatCardAIO(html.Div):
                 dmc.CardSection(
                     dmc.Group(
                         [
+                            dcc.Store(id=self.ids.data(aio_id)),
                             thermometer,
                             value
                         ],
@@ -137,10 +144,15 @@ class ThermostatCardAIO(html.Div):
         [
             Input(ids.segmented_control(MATCH), 'value'),
             Input("theme", "checked"),
+            Input("system-clock", "n_intervals"),
+            State(ids.data(MATCH), "data"),
         ]
     )
-    def update_thermostat_card(segment, checked):
+    def update_thermostat_card(segment, checked, clock, data):
         # TODO: stream to this and set the value depending on its physical state
+        if data:
+            print(">>>>>")
+            print("UPDATE THERMOSTAT CARD", data.get("val"))
 
         unit = "c"
 

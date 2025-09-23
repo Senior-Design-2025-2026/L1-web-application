@@ -1,9 +1,14 @@
 import dash
-from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_renderer, State
+from dash import Dash, html, dcc, Input, Output, clientside_callback, _dash_renderer, State, ctx
 import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
 import redis
 import os
+
+import pandas as pd
+from components.aio.thermostat_card import ThermostatCardAIO
+
+from utils.process_stream import process_stream
 
 import time
 
@@ -19,12 +24,16 @@ from components.shell.footer import footer
 from database.db_methods import DB
 
 # ===================================================
-#                  REDIS STREAM
+#                REDIS STREAM + CACHE
 # ===================================================
 # we are using redis stream to communicate between the 
-# c/c++ embedded code and the web server.
+# additionally, we are using the redis cache to hold
+# the processed dataframe to limit computation within 
+# callbacks. 
+HOST = os.getenv("HOST")
 SOCK = os.getenv("SOCK")
-stream = redis.Redis(
+
+red = redis.Redis(
     unix_socket_path=SOCK,
     decode_responses=True
 )
@@ -60,7 +69,7 @@ app = Dash(
 
 app.title = "Lab 1: ECE Senior Design"
 
-live_page_obj      = LivePage(db=DB, app=app)
+live_page_obj      = LivePage(db=DB, app=app, redis=red)
 analytics_page_obj = AnalyticsPage(db=DB, app=app)
 settings_page_obj  = SettingsPage(db=DB, app=app)
 
@@ -89,7 +98,6 @@ app.layout = dmc.MantineProvider(
             id="system-clock",
             interval=(INTERVAL * 1000),                 # in ms! 
             n_intervals=0
-
         ),
         dmc.AppShell(
             [
@@ -103,7 +111,6 @@ app.layout = dmc.MantineProvider(
                         px="sm",
                     ),
                 ),
-                html.Div(id="recent"),
                 footer()
             ],
             header={"height":60, "width":"100%"},
@@ -112,13 +119,35 @@ app.layout = dmc.MantineProvider(
 )
 
 @app.callback(
-    Output("recent", "children"),
-    Input("system-clock", "n_intervals")
+    Output(ThermostatCardAIO.ids.data("1"), "data"),
+    Output(ThermostatCardAIO.ids.data("2"), "data"),
+    Input("system-clock", "n_intervals"),
+    Input("clear-stream", "n_clicks")
 )
-def read_stream(n_intervals):
-    reading = stream.xrange("readings", "-", "+")
-    print(reading)
-    return [""]
+def process_and_cache(n_intervals, n_clicks):
+    if ctx.triggered_id == "clear-stream":
+        print("CLEARING STREAM")
+        red.delete("readings")
+        t1 = -99
+        t1 = -99
+    else:
+        data = red.xrevrange(name="readings", count=300)
+        df = (process_stream(data))
+        red.set("current_df", df.to_json())
+        first_row = df.iloc[[-1]]
+        t1 = first_row.iloc[0]["Sensor 1"]
+        t2 = first_row.iloc[0]["Sensor 2"]
+        print("")
+        print("---------")
+        print("DF", df)
+        print("---------")
+        print("FIRST ROW", first_row)
+        print("---------")
+        print("")
+
+    dat1 = {"val": str(t1)}
+    dat2 = {"val": str(t2)}
+    return dat1, dat2
 
 @app.callback(
     Output('page-content', 'children'),

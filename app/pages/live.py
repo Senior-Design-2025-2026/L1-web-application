@@ -3,13 +3,19 @@ import dash_mantine_components as dmc
 import redis
 import time
 import pandas as pd
+from io import StringIO
+from utils.temperature_utils import c_to_f
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
 
 from components.aio.thermostat_card import ThermostatCardAIO
 from database.db_methods import DB, User, Temperature
 
 class LivePage:
-    def __init__(self, db: DB, app):
+    def __init__(self, db: DB, app, redis=None):
         self.DB = db
+        self.red = redis
         
         if app is not None:
             self.callbacks()
@@ -30,35 +36,30 @@ class LivePage:
             mb=10,
         )        
 
+        card_1 = ThermostatCardAIO("Sensor 1", aio_id="1"),
+        card_2 = ThermostatCardAIO("Sensor 2", aio_id="2"),
 
         cards = dmc.Stack(
             [
-                ThermostatCardAIO("Sensor 1"),
-                ThermostatCardAIO("Sensor 2"),
+                card_1,
+                card_2
             ],
             justify="center",
             align="center"
         )
 
 
-        data = [
-            {"date": "Mar 22", "Apples": 2890, "Oranges": 2338, "Tomatoes": 2452},
-            {"date": "Mar 23", "Apples": 2756, "Oranges": 2103, "Tomatoes": 2402},
-            {"date": "Mar 24", "Apples": 3322, "Oranges": 986, "Tomatoes": 1821},
-            {"date": "Mar 25", "Apples": 3470, "Oranges": 2108, "Tomatoes": 2809},
-            {"date": "Mar 26", "Apples": 3129, "Oranges": 1726, "Tomatoes": 2290}
-        ]
-
         line_chart = dmc.Card(
             dmc.LineChart(
+                id="readings-chart",
                 h=550,
                 w=900,
-                dataKey="date",
-                data=data,
-                series = [
-                    {"name": "Apples", "color": "indigo.6"},
-                    {"name": "Tomatoes", "color": "teal.6"}
+                data=[],
+                series=[
+                    {"name": "Sensor 1", "color": "#e85d04"},
+                    {"name": "Sensor 2", "color": "#ffba08"},
                 ],
+                dataKey="date",
                 curveType="Linear",
                 tickLine="y",
                 gridAxis="x",
@@ -66,17 +67,44 @@ class LivePage:
                 withYAxis="True",
                 withDots="True",
                 yAxisLabel="Temperature °Y",
-                xAxisLabel="s"
+                withLegend=True,
+                xAxisLabel="Time (s)"
             ),
             withBorder=True,
+        )
+
+        segment = dmc.SegmentedControl(
+            id="unit-segment",
+            data=[
+                {"value": "c", "label": "Celcius °C"},
+                {"value": "f", "label": "Fahrenheit °F"},
+            ],
+            value="c",
+            size="md"
+        )
+
+        clear = dmc.Button(
+            id="clear-stream",
+            children="Clear"
         )
 
         home = dmc.Group(
             [
                 cards,
-                line_chart,
-                html.Div(id="abcde"),
-                html.Div(id="time-curr")
+                dmc.Stack(
+                    [
+                        dmc.Grid(
+                            children = [
+                                dmc.GridCol(dmc.Box(segment), span=10),
+                                dmc.GridCol(dmc.Box(clear), span=2),
+                            ],
+                            grow=True,
+                            gutter="sm"
+                        ),
+
+                        line_chart,
+                    ]
+                )
             ],
         )
 
@@ -85,18 +113,20 @@ class LivePage:
     def callbacks(self):
         @callback(
             [
-                Output("abcde", "children"),
-                Output("time-curr", "children")
+                Output("readings-chart", "data"),
             ],
             [
                 Input("system-clock", "n_intervals"),
+                Input("unit-segment", "value"),
             ]
         )
-        def process_stream(n_intervals):
-            print("PROCESS")
-            now_ms = int(time.time() * 1000)
-            prev_5_min = now_ms - 300_000
+        def update_chart(n_intervals, unit):
+            b_data = self.red.get("current_df")
+            df = pd.read_json(StringIO(b_data))
 
-            # readings = self.stream.xrange("readings", min=f"{prev_5_min}-0", max="+")
+            temperature_cols = ["Sensor 1", "Sensor 2"]
+            if unit == "f":
+                df[temperature_cols] = df[temperature_cols].apply(c_to_f)
 
-            # print(f"READ~~~{readings}~~~")
+            records = df.to_dict("records")
+            return [records]
