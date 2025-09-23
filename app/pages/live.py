@@ -1,4 +1,4 @@
-from dash import html, Input, Output, callback
+from dash import html, Input, Output, callback, State
 import dash_mantine_components as dmc
 import redis
 import time
@@ -61,14 +61,17 @@ class LivePage:
                 ],
                 dataKey="date",
                 curveType="Linear",
+
                 tickLine="y",
                 gridAxis="x",
                 withXAxis="True",
+                xAxisLabel="Time (s)",
+
                 withYAxis="True",
+                yAxisLabel="Temperature",
+
                 withDots="True",
-                yAxisLabel="Temperature °Y",
                 withLegend=True,
-                xAxisLabel="Time (s)"
             ),
             withBorder=True,
         )
@@ -112,13 +115,10 @@ class LivePage:
 
     def callbacks(self):
         @callback(
-            [
-                Output("readings-chart", "data"),
-            ],
-            [
-                Input("system-clock", "n_intervals"),
-                Input("unit-segment", "value"),
-            ]
+            Output("readings-chart", "data"),
+            Output("readings-chart", "unit"),
+            Input("system-clock", "n_intervals"),
+            Input("unit-segment", "value"),
         )
         def update_chart(n_intervals, unit):
             b_data = self.red.get("current_df")
@@ -129,4 +129,5 @@ class LivePage:
                 df[temperature_cols] = df[temperature_cols].apply(c_to_f)
 
             records = df.to_dict("records")
-            return [records]
+
+            return records, f"°{unit.upper()}"

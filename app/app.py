@@ -125,25 +125,23 @@ app.layout = dmc.MantineProvider(
     Input("clear-stream", "n_clicks")
 )
 def process_and_cache(n_intervals, n_clicks):
-    if ctx.triggered_id == "clear-stream":
+    inv = -99
+    if ctx.triggered_id == "clear-stream":          
         print("CLEARING STREAM")
         red.delete("readings")
-        t1 = -99
-        t1 = -99
-    else:
-        data = red.xrevrange(name="readings", count=300)
-        df = (process_stream(data))
-        red.set("current_df", df.to_json())
-        first_row = df.iloc[[-1]]
-        t1 = first_row.iloc[0]["Sensor 1"]
-        t2 = first_row.iloc[0]["Sensor 2"]
-        print("")
-        print("---------")
-        print("DF", df)
-        print("---------")
-        print("FIRST ROW", first_row)
-        print("---------")
-        print("")
+        t1 = inv
+        t2 = inv
+    else:                      
+        try:
+            data = red.xrevrange(name="readings", count=300)
+            df = (process_stream(data))
+            red.set("current_df", df.to_json())
+            first_row = df.iloc[[-1]]
+            t1 = first_row.iloc[0]["Sensor 1"]
+            t2 = first_row.iloc[0]["Sensor 2"]
+        except:
+            t1 = inv
+            t2 = inv
 
     dat1 = {"val": str(t1)}
     dat2 = {"val": str(t2)}
