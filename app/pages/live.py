@@ -36,8 +36,12 @@ class LivePage:
             mb=10,
         )        
 
-        card_1 = ThermostatCardAIO("Sensor 1", aio_id="1"),
-        card_2 = ThermostatCardAIO("Sensor 2", aio_id="2"),
+        # literally spend an 1 hr debugging "Error: Objects are not valid as a React child"
+        #               card_1 = ThermostatCardAIO("Sensor 1", aio_id="1"),
+        #                                                                ~~~
+        # DO NOT HAVE TRAILING "," this creates a tuple like so (ThemostatCardAIO, )
+        card_1 = ThermostatCardAIO("Sensor 1", aio_id="1")
+        card_2 = ThermostatCardAIO("Sensor 2", aio_id="2")
 
         cards = dmc.Stack(
             [

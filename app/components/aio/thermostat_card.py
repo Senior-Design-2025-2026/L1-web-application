@@ -1,11 +1,11 @@
 import dash_mantine_components as dmc
-from dash import Dash, Output, Input, State, html, dcc, callback, MATCH
+from dash import Dash, Output, Input, State, html, dcc, callback, MATCH, ctx
 import dash_daq as daq
 from dash_iconify import DashIconify
-from utils.temperature_utils import get_heat_color
+from utils.temperature_utils import get_heat_color, c_to_f
 import uuid
 
-RANGE_C = [0, 10, 20, 30, 40, 50]
+RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified
 RANGE_F = [32, 50, 68, 86, 104, 122]
 
 class ThermostatCardAIO(html.Div):
@@ -144,23 +144,21 @@ class ThermostatCardAIO(html.Div):
         [
             Input(ids.segmented_control(MATCH), 'value'),
             Input("theme", "checked"),
-            Input("system-clock", "n_intervals"),
-            State(ids.data(MATCH), "data"),
+            Input(ids.data(MATCH), "data"),
         ]
     )
-    def update_thermostat_card(segment, checked, clock, data):
-        # TODO: stream to this and set the value depending on its physical state
+    def update_thermostat_card(segment, checked, data):
         if data:
+            temp = data.get("val")
             print(">>>>>")
-            print("UPDATE THERMOSTAT CARD", data.get("val"))
+            print("UPDATE THERMOSTAT CARD", temp)
 
+        # THERMOMETER RESPONSIVENESS
         unit = "c"
-
         range = RANGE_C if unit.lower() == "c" else RANGE_F
         thermometer_min = range[0]
         thermometer_max = range[-1]
-        color = "#C9C9C9" if checked else "#454545"     # hardcoding as this component isnt managed by dmc
-
+        color = "#C9C9C9" if checked else "#454545"   
         thermometer_scale = {
             "custom": {
                 val: {"label": str(val), "style": {"color": color}}
@@ -168,18 +166,21 @@ class ThermostatCardAIO(html.Div):
             }
         }
 
-        # ON
+        # IF ON: display
         if segment == "ON":
             hidden = False
             thermometer_value = 30
             thermometer_color = get_heat_color(thermometer_value, "c")
 
-            reading = "XXX °Y"
+            if unit == "f":
+                temp = c_to_f(temp)
+
+            reading = f"{temp} °{unit.upper()}"
 
             segment_value = "ON"
             segment_color = "green"
 
-        # OFF            
+        # IF OFF: display message
         else:
             hidden = True
             thermometer_value = 0
@@ -189,8 +190,6 @@ class ThermostatCardAIO(html.Div):
 
             segment_value = "OFF"
             segment_color = "red"
-
-        
 
         return (
             hidden,

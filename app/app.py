@@ -111,7 +111,6 @@ app.layout = dmc.MantineProvider(
                         px="sm",
                     ),
                 ),
-                html.Div(id="testing"),
                 footer()
             ],
             header={"height":60, "width":"100%"},
@@ -120,7 +119,6 @@ app.layout = dmc.MantineProvider(
 )
 
 @app.callback(
-    Output("testing", "children"),
     Output(ThermostatCardAIO.ids.data("1"), "data"),
     Output(ThermostatCardAIO.ids.data("2"), "data"),
     Input("system-clock", "n_intervals"),
@@ -147,8 +145,7 @@ def process_and_cache(n_intervals, n_clicks):
 
     dat1 = {"val": str(t1)}
     dat2 = {"val": str(t2)}
-    return [""]
-    # return dat1, dat2
+    return dat1, dat2
 
 @app.callback(
     Output('page-content', 'children'),
