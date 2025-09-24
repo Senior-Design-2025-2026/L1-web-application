@@ -1,7 +1,7 @@
 from dash import html, Output, Input, callback, ctx
 import dash_ag_grid as dag
 import dash_mantine_components as dmc
-from database.db_methods import DB
+from db.db_methods import DB
 
 class SettingsPage:
     def __init__(self, app, db: DB):

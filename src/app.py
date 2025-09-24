@@ -13,16 +13,15 @@ from pages.settings import SettingsPage
 
 from components.shell.header import header
 from components.shell.footer import footer
+from celery import Celery
 
-from database.db_methods import DB
-
-from src.celery_app import insert_record
+from db.db_methods import DB
 
 # environment variables (see top level .env & compose.yml)
 HOST    = os.getenv("HOST", "0.0.0.0")
 PORT    = os.getenv("PORT", "8050")
 SOCK    = os.getenv("SOCK")
-DB_PATH = os.getenv("DB_PATH")
+DB_PATH = os.getenv("DB_PATH", "src/database/sqlite/lab1.db")
 
 # ===================================================
 #                REDIS STREAM + CACHE
@@ -34,6 +33,11 @@ DB_PATH = os.getenv("DB_PATH")
 red = redis.Redis(
     unix_socket_path=SOCK,
     decode_responses=True
+)
+
+celery_client = Celery(
+    main=__name__,
+    broker=f"redis+socket://{SOCK}",
 )
 
 # ===================================================
@@ -139,8 +143,9 @@ def process_and_cache(n_intervals, n_clicks):
             t1 = first_row.iloc[0]["Sensor 1"]
             t2 = first_row.iloc[0]["Sensor 2"]
 
-            insert_record.delay(sensor_id=1, timestamp=stamp, temperature=t1)
-            insert_record.delay(sensor_id=2, timestamp=stamp, temperature=t2)
+            # add to database 
+            celery_client.send_task("insert_record", kwargs={"sensor_id":1, "timestamp":stamp, "temperature_c":t1})
+            celery_client.send_task("insert_record", kwargs={"sensor_id":2, "timestamp":stamp, "temperature_c":t2})
 
         except Exception as e:
             print("EXCEPTION: ", e)
