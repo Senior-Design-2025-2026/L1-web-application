@@ -3,9 +3,7 @@ import dash_mantine_components as dmc
 import redis
 import os
 from components.aio.thermostat_card import ThermostatCardAIO
-
 from utils.process_stream import process_stream
-
 
 from pathlib import Path
 
@@ -16,13 +14,15 @@ from pages.settings import SettingsPage
 from components.shell.header import header
 from components.shell.footer import footer
 
-from database.db_methods import DB, add_reading
+from database.db_methods import DB
 
-# environment variables (see lab1/.env)
+from src.celery_app import insert_record
+
+# environment variables (see top level .env & compose.yml)
 HOST    = os.getenv("HOST", "0.0.0.0")
 PORT    = os.getenv("PORT", "8050")
-SOCK    = os.getenv("SOCK", "not available outside container")
-DB_PATH = os.getenv("DB_PATH", "not availabe outside container")
+SOCK    = os.getenv("SOCK")
+DB_PATH = os.getenv("DB_PATH")
 
 # ===================================================
 #                REDIS STREAM + CACHE
@@ -139,9 +139,8 @@ def process_and_cache(n_intervals, n_clicks):
             t1 = first_row.iloc[0]["Sensor 1"]
             t2 = first_row.iloc[0]["Sensor 2"]
 
-            # write to database in the background       TODO
-            # add_reading.delay(sensor_id=1, timestamp=stamp, temperature=t1)
-            # add_reading.delay(sensor_id=2, timestamp=stamp, temperature=t2)
+            insert_record.delay(sensor_id=1, timestamp=stamp, temperature=t1)
+            insert_record.delay(sensor_id=2, timestamp=stamp, temperature=t2)
 
         except Exception as e:
             print("EXCEPTION: ", e)

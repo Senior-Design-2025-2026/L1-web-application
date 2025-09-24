@@ -53,13 +53,3 @@ class DB:
             query = select(Temperature)
             result = pd.read_sql_query(query, con=conn)
             return result
-
-# TODO celery
-# @celery_app.task
-def add_reading(sensor_id: str, timestamp, temperature: float):
-    print("ADDING RECORD")
-    db = DB("app/database/sqlite/lab1.db")
-    reading = Temperature(sensor_id=sensor_id, timestamp=timestamp, temperature_c=temperature)
-    with Session(db.engine) as session:
-        session.add(reading)
-        session.commit()
