@@ -2,8 +2,7 @@ from dash import Dash, html, dcc, Input, Output, ctx
 import dash_mantine_components as dmc
 import redis
 import os
-from celery import Celery
-
+from celery_app import celery_app
 from components.aio.thermostat_card import ThermostatCardAIO
 
 from utils.process_stream import process_stream
@@ -18,7 +17,7 @@ from pages.settings import SettingsPage
 from components.shell.header import header
 from components.shell.footer import footer
 
-from database.db_methods import DB
+from database.db_methods import DB, add_reading
 
 # environment variables (see lab1/.env)
 HOST    = os.getenv("HOST", "0.0.0.0")
@@ -36,18 +35,6 @@ DB_PATH = os.getenv("DB_PATH", "app/database/sqlite/lab1.db")
 red = redis.Redis(
     unix_socket_path=SOCK,
     decode_responses=True
-)
-
-# ===================================================
-#                CELERY TASK QUEUE
-# ===================================================
-# we are using celery to handle the sending of emails
-# and saving the stream data of the thermometer
-# asynchronously. Celery integrates well into dash so
-celery_app = Celery(
-    main=__name__,
-    broker=f"redis+socket://{SOCK}",
-    backend=f"sqla+sqlite:///{DB_PATH}",            
 )
 
 # ===================================================
@@ -148,13 +135,19 @@ def process_and_cache(n_intervals, n_clicks):
             df = (process_stream(data))
             red.set("current_df", df.to_json())
             first_row = df.iloc[[-1]]
+
+            stamp = int(first_row.iloc[0]["date"])
             t1 = first_row.iloc[0]["Sensor 1"]
             t2 = first_row.iloc[0]["Sensor 2"]
-        except:
+
+            # add in background
+            add_reading(sensor_id=1, timestamp=stamp, temperature=t1)
+            add_reading(sensor_id=2, timestamp=stamp, temperature=t2)
+
+        except Exception as e:
+            print("EXCEPTION: ", e)
             t1 = inv
             t2 = inv
-        
-    DB.add_reading()
 
     dat1 = {"val": str(t1)}
     dat2 = {"val": str(t2)}

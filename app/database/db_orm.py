@@ -34,13 +34,10 @@ class Temperature(Base):
     """A sensor reading within 'temperature_readings'"""
     __tablename__ = "temperature_readings"
 
-    sensor_id: Mapped[int]       = mapped_column(Integer, primary_key=True)
+    id: Mapped[int]              = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sensor_id: Mapped[int]       = mapped_column(Integer, nullable=False)
     timestamp: Mapped[str]       = mapped_column(String, nullable=False)
     temperature_c: Mapped[float] = mapped_column(Float, nullable=True)
-
-    __table_args__ = (
-        UniqueConstraint("sensor_id"),            
-    )
 
     def __repr__(self):
         return f"<temperature_readings(sensor_id={self.sensor_id}, timestamp={self.timestamp}, temperature_c={self.temperature_c})>"
@@ -50,9 +47,9 @@ class User(Base):
     __tablename__ = "user_configurations"
 
     user_id: Mapped[int]              = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str]                 = mapped_column(String(30))
-    phone_num: Mapped[Optional[str]]  = mapped_column(String(15))
-    email_addr: Mapped[Optional[str]] = mapped_column(String(128))
+    name: Mapped[str]                 = mapped_column(String(30), nullable=False)
+    phone_num: Mapped[Optional[str]]  = mapped_column(String(15), nullable=True)
+    email_addr: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
     __table_args__ = (
         UniqueConstraint("user_id", "name"),            
@@ -86,22 +83,3 @@ if __name__ == "__main__":
         session.add(matt)
         session.add(user1)
         session.commit()
-
-
-    import time
-    
-    dummy_data = [
-        {"sensor_id": 1, "timestamp": str(int(time.time())), "temperature_c": 21.5},
-        {"sensor_id": 2, "timestamp": str(int(time.time())), "temperature_c": 22.0},
-        {"sensor_id": 3, "timestamp": str(int(time.time())), "temperature_c": 20.8},
-        {"sensor_id": 4, "timestamp": str(int(time.time())), "temperature_c": 23.1},
-        {"sensor_id": 5, "timestamp": str(int(time.time())), "temperature_c": 19.9},
-    ]
-
-    with Session(engine) as session:
-        for row in dummy_data:
-            session.add(Temperature(**row))
-        session.commit()
-
-
-

@@ -8,7 +8,6 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
 from components.aio.thermostat_card import ThermostatCardAIO
-from database.db_methods import DB
 
 SENSOR_1_COLOR = "#e85d04"
 SENSOR_2_COLOR = "#ffba08"
