@@ -153,8 +153,6 @@ class ThermostatCardAIO(html.Div):
     def update_thermostat_card(segment, checked, unit, data):
         if data:
             temp = float(data.get("val"))
-            print(">>>>>")
-            print("UPDATE THERMOSTAT CARD", temp)
 
         # range
         if unit == "c":

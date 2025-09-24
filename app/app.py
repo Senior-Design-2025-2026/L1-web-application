@@ -2,6 +2,7 @@ from dash import Dash, html, dcc, Input, Output, ctx
 import dash_mantine_components as dmc
 import redis
 import os
+from celery import Celery
 
 from components.aio.thermostat_card import ThermostatCardAIO
 
@@ -19,6 +20,12 @@ from components.shell.footer import footer
 
 from database.db_methods import DB
 
+# environment variables (see lab1/.env)
+HOST    = os.getenv("HOST", "0.0.0.0")
+PORT    = os.getenv("PORT", "8050")
+SOCK    = os.getenv("SOCK")
+DB_PATH = os.getenv("DB_PATH", "app/database/sqlite/lab1.db")
+
 # ===================================================
 #                REDIS STREAM + CACHE
 # ===================================================
@@ -26,12 +33,21 @@ from database.db_methods import DB
 # additionally, we are using the redis cache to hold
 # the processed dataframe to limit computation within 
 # callbacks. 
-HOST = os.getenv("HOST")
-SOCK = os.getenv("SOCK")
-
 red = redis.Redis(
     unix_socket_path=SOCK,
     decode_responses=True
+)
+
+# ===================================================
+#                CELERY TASK QUEUE
+# ===================================================
+# we are using celery to handle the sending of emails
+# and saving the stream data of the thermometer
+# asynchronously. Celery integrates well into dash so
+celery_app = Celery(
+    main=__name__,
+    broker=f"redis+socket://{SOCK}",
+    backend=f"sqla+sqlite:///{DB_PATH}",            
 )
 
 # ===================================================
@@ -47,8 +63,7 @@ INTERVAL = 1
 # using sqlalchemy to handle crudding
 # (see db_orm and db_methods for implementation details)
 # docs: https://www.sqlalchemy.org/
-db_path = "app/database/sqlite/lab1.db"
-DB = DB(db_path=db_path)
+DB = DB(db_path=DB_PATH)
 
 # ===================================================
 #                 DASH APPLICATION
@@ -65,9 +80,9 @@ app = Dash(
 
 app.title = "Lab 1: ECE Senior Design"
 
-live_page_obj      = LivePage(db=DB, app=app, redis=red)
-analytics_page_obj = AnalyticsPage(db=DB, app=app)
-settings_page_obj  = SettingsPage(db=DB, app=app)
+live_page_obj      = LivePage(app=app, redis=red)
+analytics_page_obj = AnalyticsPage(app=app, db=DB)
+settings_page_obj  = SettingsPage(app=app, db=DB)
 
 app.layout = dmc.MantineProvider(
     theme={
@@ -138,6 +153,8 @@ def process_and_cache(n_intervals, n_clicks):
         except:
             t1 = inv
             t2 = inv
+        
+    DB.add_reading()
 
     dat1 = {"val": str(t1)}
     dat2 = {"val": str(t2)}
@@ -158,9 +175,6 @@ def display_page(pathname):
         return html.Div("404 Page Not Found")
 
 if __name__ == '__main__':
-    PORT = os.getenv("PORT", "8050")
-    HOST = os.getenv("HOST", "0.0.0.0")
-
     app.run(
         debug=True,
         port=PORT,

@@ -1,8 +1,6 @@
-from sqlalchemy import create_engine, func, Integer, String, DateTime, Float, UniqueConstraint
+from sqlalchemy import create_engine, func, Integer, String, Time, Float, UniqueConstraint
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
-from datetime import datetime, timedelta
-
 from typing import Optional
 
 # ================================================== SQL ALCHEMY ================================================== 
@@ -37,8 +35,8 @@ class Temperature(Base):
     __tablename__ = "temperature_readings"
 
     sensor_id: Mapped[int]       = mapped_column(Integer, primary_key=True)
-    timestamp: Mapped[DateTime]  = mapped_column(DateTime, default=func.now())
-    temperature_c: Mapped[float] = mapped_column(Float)
+    timestamp: Mapped[str]       = mapped_column(String, nullable=False)
+    temperature_c: Mapped[float] = mapped_column(Float, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("sensor_id"),            
@@ -65,7 +63,7 @@ class User(Base):
 
 if __name__ == "__main__":
     print("RUNNING")
-    engine = create_engine("sqlite:///lab1.db", echo=True)
+    engine = create_engine("sqlite:///sqlite/lab1.db", echo=True)
 
     tables: list[Base] = [Temperature(), User()]
 
@@ -90,13 +88,14 @@ if __name__ == "__main__":
         session.commit()
 
 
+    import time
     
     dummy_data = [
-        {"sensor_id": 1, "timestamp": datetime.now(), "temperature_c": 21.5},
-        {"sensor_id": 2, "timestamp": datetime.now() + timedelta(minutes=5), "temperature_c": 22.0},
-        {"sensor_id": 3, "timestamp": datetime.now() + timedelta(minutes=10), "temperature_c": 20.8},
-        {"sensor_id": 4, "timestamp": datetime.now() + timedelta(minutes=15), "temperature_c": 23.1},
-        {"sensor_id": 5, "timestamp": datetime.now() + timedelta(minutes=20), "temperature_c": 19.9},
+        {"sensor_id": 1, "timestamp": str(int(time.time())), "temperature_c": 21.5},
+        {"sensor_id": 2, "timestamp": str(int(time.time())), "temperature_c": 22.0},
+        {"sensor_id": 3, "timestamp": str(int(time.time())), "temperature_c": 20.8},
+        {"sensor_id": 4, "timestamp": str(int(time.time())), "temperature_c": 23.1},
+        {"sensor_id": 5, "timestamp": str(int(time.time())), "temperature_c": 19.9},
     ]
 
     with Session(engine) as session:

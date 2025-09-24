@@ -14,8 +14,7 @@ SENSOR_1_COLOR = "#e85d04"
 SENSOR_2_COLOR = "#ffba08"
 
 class LivePage:
-    def __init__(self, db: DB, app, redis=None):
-        self.DB = db
+    def __init__(self, app, redis=None):
         self.red = redis
         
         if app is not None:

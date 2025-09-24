@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, select, update, delete
 from sqlalchemy.orm import Session
 import pandas as pd
+from app.app import celery_app
 
 from .db_orm import User, Temperature
 from pathlib import Path
@@ -55,7 +56,8 @@ class DB():
                 select(Temperature)
             )
 
-    def add_reading(self, reading: Temperature):
+    @celery_app.task
+    def add_reading(self, sensor_id: str, timestamp):
         with Session(self.engine) as session:
             session.add(Temperature)
             session.commit()
