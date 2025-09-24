@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine, select, update, delete
 from sqlalchemy.orm import Session
 import pandas as pd
-from celery_app import celery_app
 from typing import Union
 from .db_orm import User, Temperature
 from pathlib import Path
@@ -55,7 +54,8 @@ class DB:
             result = pd.read_sql_query(query, con=conn)
             return result
 
-@celery_app.task
+# TODO celery
+# @celery_app.task
 def add_reading(sensor_id: str, timestamp, temperature: float):
     print("ADDING RECORD")
     db = DB("app/database/sqlite/lab1.db")

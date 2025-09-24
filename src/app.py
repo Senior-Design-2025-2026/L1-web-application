@@ -2,7 +2,6 @@ from dash import Dash, html, dcc, Input, Output, ctx
 import dash_mantine_components as dmc
 import redis
 import os
-from celery_app import celery_app
 from components.aio.thermostat_card import ThermostatCardAIO
 
 from utils.process_stream import process_stream
@@ -140,9 +139,9 @@ def process_and_cache(n_intervals, n_clicks):
             t1 = first_row.iloc[0]["Sensor 1"]
             t2 = first_row.iloc[0]["Sensor 2"]
 
-            # add in background
-            add_reading(sensor_id=1, timestamp=stamp, temperature=t1)
-            add_reading(sensor_id=2, timestamp=stamp, temperature=t2)
+            # write to database in the background       TODO
+            # add_reading.delay(sensor_id=1, timestamp=stamp, temperature=t1)
+            # add_reading.delay(sensor_id=2, timestamp=stamp, temperature=t2)
 
         except Exception as e:
             print("EXCEPTION: ", e)

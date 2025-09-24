@@ -4,9 +4,6 @@ import pandas as pd
 from io import StringIO
 from utils.temperature_utils import c_to_f, c_to_k
 
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-
 from components.aio.thermostat_card import ThermostatCardAIO
 
 SENSOR_1_COLOR = "#e85d04"
