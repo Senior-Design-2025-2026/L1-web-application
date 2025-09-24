@@ -1,5 +1,5 @@
 FROM astral/uv:python3.12-bookworm-slim
-WORKDIR /app
+WORKDIR /web
 
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen

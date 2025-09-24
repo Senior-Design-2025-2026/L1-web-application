@@ -1,5 +1,4 @@
 from dash import html
-
 from database.db_methods import DB
 
 class AnalyticsPage:
