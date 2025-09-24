@@ -21,8 +21,8 @@ from database.db_methods import DB, add_reading
 # environment variables (see lab1/.env)
 HOST    = os.getenv("HOST", "0.0.0.0")
 PORT    = os.getenv("PORT", "8050")
-SOCK    = os.getenv("SOCK")
-DB_PATH = os.getenv("DB_PATH", "app/database/sqlite/lab1.db")
+SOCK    = os.getenv("SOCK", "not available outside container")
+DB_PATH = os.getenv("DB_PATH", "not availabe outside container")
 
 # ===================================================
 #                REDIS STREAM + CACHE
@@ -60,7 +60,7 @@ DB = DB(db_path=DB_PATH)
 
 app = Dash(
     name="ECE Senior Design Lab 1", 
-    assets_folder=str(Path.cwd() / "app" / "assets"),
+    assets_folder=str(Path.cwd() / "src" / "assets"),
     suppress_callback_exceptions=True
 )
 
