@@ -1,7 +1,3 @@
-# Dockerfile image for dash application:
-# switched from uv to pip as pip is smaller. 
-# ts needs to run on a pi.
-
 FROM python:3.12-slim-bookworm
 WORKDIR /dash_app
 
