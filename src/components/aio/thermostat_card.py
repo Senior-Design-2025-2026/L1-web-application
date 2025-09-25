@@ -82,10 +82,9 @@ class ThermostatCardAIO(html.Div):
             id=self.ids.thermometer_div(aio_id)
         )
 
-        value = dmc.Text(
+        temperature = dmc.Text(
             id=self.ids.value(aio_id),
-            size="xl",
-            fz="h1",
+            fz="h2",
             fw="500"
         )
 
@@ -108,17 +107,22 @@ class ThermostatCardAIO(html.Div):
                 
                 # middle: thermometer chart
                 dmc.CardSection(
-                    dmc.Group(
-                        [
-                            dcc.Store(id=self.ids.data(aio_id)),
-                            thermometer,
-                            value
-                        ],
-                        justify="center",
-                        align="center",
-                        h="200px",
-                        mb="30"
-                    )
+                    [
+                        dcc.Store(id=self.ids.data(aio_id)),
+                        dmc.Stack(
+                            [
+                                thermometer,
+                                temperature,
+                            ],
+                            justify="center",
+                            align="center",
+                            h="200px",
+                            gap="lg",
+                            mb="30"
+                        )
+                    ], 
+                    h=240,
+                    py="md"
                 ),
             ],
             withBorder=True,
@@ -179,6 +183,7 @@ class ThermostatCardAIO(html.Div):
             # IF ON, but no reading: display N/A
             if missing:
                 reading = "N/A"
+                hidden = True
             else:
                 temp = float(temp)
                 if unit == "f":
@@ -190,7 +195,7 @@ class ThermostatCardAIO(html.Div):
                 else:
                     unit = f" °{unit.upper()}"
 
-                reading = f"{temp}{unit}"
+                reading = f"{temp:.2f}{unit}"
 
             segment_value = "ON"
             segment_color = "green"

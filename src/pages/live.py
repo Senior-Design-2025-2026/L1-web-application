@@ -144,6 +144,12 @@ class LivePage:
                 df[temperature_cols] = df[temperature_cols].apply(c_to_f)
             elif unit == "k":
                 df[temperature_cols] = df[temperature_cols].apply(c_to_k)
+            
+            df["date"] = pd.to_datetime(df["date"], unit="s")
+            df["date"] = df["date"].dt.tz_localize("UTC")
+            df["date"] = df["date"].dt.tz_convert("America/Chicago")
+            df["date"] = df["date"].dt.time
+
             records = df.to_dict("records")
 
             # CLIENT-SIDE CACHE TEMPERATURE READINGS
