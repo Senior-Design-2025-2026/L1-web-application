@@ -12,6 +12,10 @@ from email.mime.multipart import MIMEMultipart
 
 # Conversion functions
 def celsiusToFahrenheit(temperature):
+    if float(temperature) > 50:
+        temperature = "50"
+    elif float(temperature) < 10:
+        temperature = "10"
     return float(temperature) * 9/5 + 32
 
 sensor1Toggled = False
@@ -96,6 +100,10 @@ def getTemperatureData():
         temperature1 = celsiusToFahrenheit(tempData["sensor1Temperature"])
     else:
         temperature1 = float(tempData["sensor1Temperature"])
+        if temperature1 > 50:
+            temperature1 = 50
+        elif temperature1 < 10:
+            temperature1 = 10
 
     if tempData["sensor2Temperature"] == None:
         temperature2 = None
@@ -103,16 +111,32 @@ def getTemperatureData():
         temperature2 = celsiusToFahrenheit(tempData["sensor2Temperature"])
     else:
         temperature2 = float(tempData["sensor2Temperature"])
+        if temperature2 > 50:
+            temperature2 = 50
+        elif temperature2 < 10:
+            temperature2 = 10
+
+    # Update labels in dashboard
+    if temperature1 == None:
+        dashboard_page_obj.set_temp1_label("Sensor1: Error")
+    else:
+        dashboard_page_obj.set_temp1_label("Sensor 1: " + str(int(temperature1)) + " " + dashboard_page_obj.unit)
+
+    # Update labels in dashboard
+    if temperature2 == None:
+        dashboard_page_obj.set_temp2_label("Sensor2: Error")
+    else:
+        dashboard_page_obj.set_temp2_label("Sensor 2: " + str(int(temperature2)) + " " + dashboard_page_obj.unit)
 
 
     # Shift temperature columns up to remove oldest data (first row)
-    dashboard_page_obj.df["temperatureSensor1Data"] = dashboard_page_obj.df["temperatureSensor1Data"].shift(-1)
-    dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(-1)
+    dashboard_page_obj.df["temperatureSensor1Data"] = dashboard_page_obj.df["temperatureSensor1Data"].shift(1)
+    dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(1)
     
 
     # Append new temperature data to the last row
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = temperature1
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = temperature2
+    dashboard_page_obj.df.iloc[0, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = temperature1
+    dashboard_page_obj.df.iloc[0, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = temperature2
 
     if (settings_page_obj.saved_email is not None and (temperature1 != None and temperature1 > settings_page_obj.max_temperature or 
         temperature2 != None and temperature2 > settings_page_obj.max_temperature)):
@@ -132,6 +156,25 @@ def getTemperatureData():
             dashboard_page_obj.overThreshold = True
     else:
         dashboard_page_obj.overThreshold = False
+
+    if (settings_page_obj.saved_email is not None and (temperature1 != None and temperature1 < settings_page_obj.min_temperature or 
+        temperature2 != None and temperature2 < settings_page_obj.min_temperature)):
+        if not dashboard_page_obj.underThreshold:
+            me = "seniordesignteam3@uiowa.edu"
+            you = settings_page_obj.saved_email
+
+            msg = MIMEText(f"Temperature read under {settings_page_obj.min_temperature} degrees C")
+            msg["Subject"] = "Temperature Over Threshold"
+            msg["From"] = me
+            msg["To"] = you
+
+            with smtplib.SMTP("ns-mx.uiowa.edu", 25) as server:
+                server.sendmail(me, [you], msg.as_string())
+
+            # Only send once
+            dashboard_page_obj.underThreshold = True
+    else:
+        dashboard_page_obj.underThreshold = False
 
     
     # Handling a potential user toggle

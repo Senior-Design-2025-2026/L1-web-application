@@ -24,6 +24,7 @@ class SettingsPage:
         self.app = app
         self.saved_email = None
         self.max_temperature = 25
+        self.min_temperature = 0
         self.register_callbacks()
 
     def register_callbacks(self):
@@ -31,12 +32,14 @@ class SettingsPage:
             Output("saved-output", "children"),
             Input("save-email-button", "n_clicks"),
             State("max-temperature-input", "value"),
+            State("min-temperature-input", "value"),
             State("email-input", "value")
         )
-        def save_email(n_clicks, max_temp_value, email_value):
+        def save_email(n_clicks, max_temp_value, min_temp_value, email_value):
             if n_clicks > 0 and email_value:
                 self.saved_email = email_value
                 self.max_temperature = max_temp_value
+                self.min_temperature = min_temp_value
                 return f"Saved"
             return "No email saved yet"
 
@@ -63,12 +66,13 @@ class SettingsPage:
 
         # Input field and button to save email
         email_input = dcc.Input(id="email-input", type="email", placeholder="Enter email")
-        max_temperature_input = dcc.Input(id="max-temperature-input", type="number", placeholder="25")
+        max_temperature_input = dcc.Input(id="max-temperature-input", type="number", placeholder="Max")
+        min_temperature_input = dcc.Input(id="min-temperature-input", type="number", placeholder="Min")
         save_button = html.Button("Save", id="save-email-button", n_clicks=0)
         output_text = html.Div(id="saved-output")
 
         # Wrap them together
-        email_section = html.Div([email_input, max_temperature_input, save_button, output_text])
+        email_section = html.Div([email_input, max_temperature_input, min_temperature_input, save_button, output_text])
 
         layout = flex_builder(
             direction="column",

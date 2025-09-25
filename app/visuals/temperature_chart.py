@@ -19,7 +19,7 @@ def create_chart(
         df: pd.DataFrame,
         temp_unit: str = "C",       # default per embedded side
         time_unit: str = "s",       # default per this server
-) -> go.Figure:
+) -> html.Div:
     """
     Plots a line chart of temperature readings for two sensors.
 
@@ -54,6 +54,7 @@ def create_chart(
         xaxis_title=f"Seconds Ago ({time_unit})",
         yaxis_title=f"Temperature ({temp_unit})",
         yaxis=dict(range=[10, 50] if temp_unit == 'C' else [50, 122]),
+        xaxis=dict(autorange="reversed"),
         legend_title="Sensor",
         template="simple_white"
     )

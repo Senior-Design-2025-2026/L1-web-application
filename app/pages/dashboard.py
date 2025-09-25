@@ -25,7 +25,7 @@ class DashboardPage:
 
         self.df = pd.DataFrame({
             "id": [1]*301,
-            "time": list(reversed(range(301))),
+            "time": list(range(301)),
             "temperatureSensor1Data": [None for _ in range(301)],
             "temperatureSensor2Data": [None for _ in range(301)]
         })
@@ -37,17 +37,12 @@ class DashboardPage:
         self.tc2 = SensorCard(app, sensor_id=2)
         self.tc2.create()
 
-        # STAT CARDS
-        self.avg1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="avg", test_df=self.df)
-        self.min1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="min", test_df=self.df)
-        self.max1 = StatCard(app=app, sensor_id=1, field="temperature", stat_method="max", test_df=self.df)
+        # Labels for the temperatures
+        self.sensor1Temperature = "Temperature 1: "
+        self.sensor2Temperature = "Temperature 2: "
 
-        self.avg2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="avg", test_df=self.df)
-        self.min2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="min", test_df=self.df)
-        self.max2 = StatCard(app=app, sensor_id=2, field="temperature", stat_method="max", test_df=self.df)
-
-        self.threshold = 40
         self.overThreshold = False
+        self.underThreshold = False
 
         # Fields so the app can see the status and communicate with the sensor program
         self.unit = "C"
@@ -88,18 +83,9 @@ class DashboardPage:
             size="md",
         )  
 
-        # VISUALS
         sensor_card_1 = self.tc1.render()
         sensor_card_2 = self.tc2.render()
 
-        sensor_1_avg = self.avg1.create()
-        sensor_2_avg = self.avg2.create()
-
-        sensor_1_min = self.min1.create()
-        sensor_2_min = self.min2.create()
-
-        sensor_1_max = self.max1.create()
-        sensor_2_max = self.max2.create()
 
         readings_chart = html.Div(id="line-chart")
 
@@ -112,14 +98,14 @@ class DashboardPage:
         sensor_row_1 = flex_builder(
             direction="row",
             children=[
-                sensor_card_1, sensor_1_avg, sensor_1_min, sensor_1_max
+                sensor_card_1
             ]
         )
 
         sensor_row_2 = flex_builder(
             direction="row",
             children=[
-                sensor_card_2, sensor_2_avg, sensor_2_min, sensor_2_max
+                sensor_card_2
             ]
         )
 
@@ -131,10 +117,20 @@ class DashboardPage:
             ]
         )
 
+        labels_flex = flex_builder(
+            direction="row",
+            children=[
+                html.Div(self.sensor1Temperature, id="sensor1", style={"fontSize": "30px", "fontWeight": "bold"}),
+                html.Div(self.sensor2Temperature, id="sensor2", style={"fontSize": "30px", "fontWeight": "bold"}),
+            ],
+            size="md",
+        )
+
+
         visuals_row = flex_builder(
             direction="row",
             children=[
-                reading_flex, stats_flex
+                reading_flex, stats_flex, labels_flex
             ]
         )
 
@@ -185,3 +181,22 @@ class DashboardPage:
             self.unit = temp_u
 
             return line_chart
+
+        @callback(
+            Output("sensor1", "children"),
+            Output("sensor2", "children"),
+            Input("interval", "n_intervals") 
+        )
+        def update_labels(_):
+            return self.sensor1Temperature, self.sensor2Temperature
+
+    
+    # Methods to change labels from outside
+    def set_temp1_label(self, text: str):
+        self.sensor1Temperature = text
+
+    def set_temp2_label(self, text: str):
+        self.sensor2Temperature = text
+
+    
+    
