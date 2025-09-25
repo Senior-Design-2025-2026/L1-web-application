@@ -10,6 +10,15 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+# Conversion functions
+def celsiusToFahrenheit(temperature):
+    return float(temperature) * 9/5 + 32
+
+sensor1Toggled = False
+lastSensor1Value = True
+sensor2Toggled = False
+lastSensor2Value = True
+
 
 # from db_conn.db_methods import DBConnection
 
@@ -73,39 +82,76 @@ settings_page_obj  = SettingsPage(app)
 @server.route('/temperatureData', methods = ['POST'])
 def getTemperatureData():
 
+    global lastSensor1Value, lastSensor2Value
+    global sensor1Toggled, sensor2Toggled
+
     tempData = request.get_json()
+
+    temperature1 = 0
+    temperature2 = 0
+
+    if tempData["sensor1Temperature"] == None:
+        temperature1 = None
+    elif dashboard_page_obj.unit == 'F':
+        temperature1 = celsiusToFahrenheit(tempData["sensor1Temperature"])
+    else:
+        temperature1 = float(tempData["sensor1Temperature"])
+
+    if tempData["sensor2Temperature"] == None:
+        temperature2 = None
+    elif dashboard_page_obj.unit == 'F':
+        temperature2 = celsiusToFahrenheit(tempData["sensor2Temperature"])
+    else:
+        temperature2 = float(tempData["sensor2Temperature"])
+
 
     # Shift temperature columns up to remove oldest data (first row)
     dashboard_page_obj.df["temperatureSensor1Data"] = dashboard_page_obj.df["temperatureSensor1Data"].shift(-1)
     dashboard_page_obj.df["temperatureSensor2Data"] = dashboard_page_obj.df["temperatureSensor2Data"].shift(-1)
     
 
-    print(tempData)
     # Append new temperature data to the last row
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = None if tempData["sensor1Temperature"] == None else float(tempData["sensor1Temperature"])
-    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = None if tempData["sensor2Temperature"] == None else float(tempData["sensor2Temperature"])
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = temperature1
+    dashboard_page_obj.df.iloc[-1, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = temperature2
 
-    if (tempData["sensor1Temperature"] != None and int(tempData["sensor1Temperature"]) > 25):
+    if (settings_page_obj.saved_email is not None and (temperature1 != None and temperature1 > settings_page_obj.max_temperature or 
+        temperature2 != None and temperature2 > settings_page_obj.max_temperature)):
         if not dashboard_page_obj.overThreshold:
-            dashboard_page_obj.overThreshold = True
-        else:
-            me = "mnkrueger@uiowa.edu"
-            you = "sage-marks@uiowa.edu"
+            me = "seniordesignteam3@uiowa.edu"
+            you = settings_page_obj.saved_email
 
-            msg = MIMEText("Temperature read over 40 degrees C")
+            msg = MIMEText(f"Temperature read over {settings_page_obj.max_temperature} degrees C")
             msg["Subject"] = "Temperature Over Threshold"
             msg["From"] = me
             msg["To"] = you
 
             with smtplib.SMTP("ns-mx.uiowa.edu", 25) as server:
                 server.sendmail(me, [you], msg.as_string())
+
+            # Only send once
+            dashboard_page_obj.overThreshold = True
     else:
         dashboard_page_obj.overThreshold = False
 
+    
+    # Handling a potential user toggle
+    if dashboard_page_obj.tc1._active != lastSensor1Value:
+        sensor1Toggled = True
+        lastSensor1Value = dashboard_page_obj.tc1._active
+    else:
+        sensor1Toggled = False
+
+    # Handling a potential user toggle
+    if dashboard_page_obj.tc2._active != lastSensor2Value:
+        sensor2Toggled = True
+        lastSensor2Value = dashboard_page_obj.tc2._active
+    else:
+        sensor2Toggled = False
+
     return jsonify([
                 dashboard_page_obj.unit,
-                dashboard_page_obj.tc1._active,
-                dashboard_page_obj.tc2._active
+                sensor1Toggled,
+                sensor2Toggled
             ]), 200
 
 

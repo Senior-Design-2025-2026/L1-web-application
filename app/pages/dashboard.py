@@ -7,6 +7,18 @@ from components.SensorCard import SensorCard
 from visuals.temperature_chart import create_chart
 from visuals.StatCard import StatCard
 
+# Conversion functions
+def celsiusToFahrenheit(temperature):
+    if temperature is None:
+        return None
+    return temperature * 9/5 + 32
+
+def fahrenheitToCelsius(temperature):
+    if temperature is None:
+        return None
+    return (temperature - 32) * 5/9
+
+
 class DashboardPage:
     def __init__(self, app):
         self.app = app
@@ -158,6 +170,16 @@ class DashboardPage:
             # TODO get the global df from redis
             line_chart = create_chart(df=self.df, time_unit=time_u, temp_unit=temp_u)
             # todo, other charts: time, min, max, avg
+
+            # Change the graph to reflect unit change
+            if self.unit != temp_u:
+                # Apply conversion to the temperature columns
+                temperatureColumns = ["temperatureSensor1Data", "temperatureSensor2Data"]
+                if temp_u == 'C':
+                    self.df[temperatureColumns] = self.df[temperatureColumns].applymap(fahrenheitToCelsius)
+                else:
+                    self.df[temperatureColumns] = self.df[temperatureColumns].applymap(celsiusToFahrenheit)
+
 
             # Update the member variable
             self.unit = temp_u

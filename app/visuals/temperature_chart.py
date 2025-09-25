@@ -53,7 +53,7 @@ def create_chart(
     fig.update_layout(
         xaxis_title=f"Seconds Ago ({time_unit})",
         yaxis_title=f"Temperature ({temp_unit})",
-        yaxis=dict(range=[10, 50]),
+        yaxis=dict(range=[10, 50] if temp_unit == 'C' else [50, 122]),
         legend_title="Sensor",
         template="simple_white"
     )
