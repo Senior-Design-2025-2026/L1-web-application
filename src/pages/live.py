@@ -1,8 +1,9 @@
-from dash import Input, Output, callback
+from dash import Input, Output, callback, ctx, html
 import dash_mantine_components as dmc
 import pandas as pd
 from io import StringIO
 from utils.temperature_utils import c_to_f, c_to_k
+from utils.process_stream import process_stream
 
 from components.aio.thermostat_card import ThermostatCardAIO
 
@@ -32,10 +33,6 @@ class LivePage:
             mb=10,
         )        
 
-        # literally spend an 1 hr debugging "Error: Objects are not valid as a React child"
-        #               card_1 = ThermostatCardAIO("Sensor 1", aio_id="1"),
-        #                                                                ~~~
-        # DO NOT HAVE TRAILING "," this creates a tuple like so (ThemostatCardAIO, )
         card_1 = ThermostatCardAIO("Sensor 1", aio_id="1", color=SENSOR_1_COLOR)
         card_2 = ThermostatCardAIO("Sensor 2", aio_id="2", color=SENSOR_2_COLOR)
 
@@ -80,8 +77,8 @@ class LivePage:
             id="unit-dropdown",
             data=[
                 {"value": "c", "label": "Celcius (°C)"},
-                {"value": "k", "label": "Kelvin (K)"},
                 {"value": "f", "label": "Fahrenheit (°F)"},
+                {"value": "k", "label": "Kelvin (K)"},
             ],
             value="c",
             size="md",
@@ -109,6 +106,7 @@ class LivePage:
                         ),
 
                         line_chart,
+                        html.Div(id="empty")
                     ]
                 )
             ],
@@ -120,21 +118,47 @@ class LivePage:
         @callback(
             Output("readings-chart", "data"),
             Output("readings-chart", "unit"),
+            Output(ThermostatCardAIO.ids.data("1"), "data"),
+            Output(ThermostatCardAIO.ids.data("2"), "data"),
             Input("system-clock", "n_intervals"),
             Input("unit-dropdown", "value"),
         )
         def update_chart(n_intervals, unit):
             try:
-                b_data = self.red.get("current_df")
-                df = pd.read_json(StringIO(b_data))
-
-                temperature_cols = ["Sensor 1", "Sensor 2"]
-                if unit == "f":
-                    df[temperature_cols] = df[temperature_cols].apply(c_to_f)
-                elif unit == "k":
-                    df[temperature_cols] = df[temperature_cols].apply(c_to_k)
-                records = df.to_dict("records")
+                data = self.red.xrevrange(name="readings", count=300)
+                df = (process_stream(data))
             except:
-                records = pd.DataFrame()
+                df = pd.DataFrame(columns=["date", "Sensor 1", "Sensor 2"])    
 
-            return records, f"°{unit.upper()}"
+            try:
+                first_row = df.iloc[[-1]]
+                sensor_1_temp = first_row.iloc[0]["Sensor 1"]
+                sensor_2_temp = first_row.iloc[0]["Sensor 2"]
+            except:
+                first_row = "NO DATA"
+                sensor_1_temp = "missing"
+                sensor_2_temp = "missing"
+
+            temperature_cols = ["Sensor 1", "Sensor 2"]
+            if unit == "f":
+                df[temperature_cols] = df[temperature_cols].apply(c_to_f)
+            elif unit == "k":
+                df[temperature_cols] = df[temperature_cols].apply(c_to_k)
+            records = df.to_dict("records")
+
+            # CLIENT-SIDE CACHE TEMPERATURE READINGS
+            # hacky, but works - was having troubles adding an instance of the redis stream into the AIO component.
+            # using client-side cache to trigger the updates. Works out nicely as the completion of this callback
+            # will ultimately trigger the AIO callbacks simulatneously. 
+            thermostat_card_1 = {"val": str(sensor_1_temp)}
+            thermostat_card_2 = {"val": str(sensor_2_temp)}
+            return records, f"°{unit.upper()}", thermostat_card_1, thermostat_card_2
+
+        @callback(
+            Output("empty", "children"),
+            Input("clear-stream", "n_clicks")
+        )
+        def clear_stream(n_clicks):
+            if ctx.triggered_id == "clear-stream":          
+                self.red.delete("readings")
+            return [""]

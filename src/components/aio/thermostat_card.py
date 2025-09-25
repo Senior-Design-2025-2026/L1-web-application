@@ -5,9 +5,9 @@ from dash_iconify import DashIconify
 from utils.temperature_utils import c_to_f, c_to_k
 import uuid
 
-RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified
-RANGE_F = [32, 50, 68, 86, 104, 122]
-RANGE_K = [273, 283, 293, 303, 313, 323]
+RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified. didnt want to include functions for these
+RANGE_F = [32, 50, 68, 86, 104, 122]        # maybe a different scale so there isnt an illusion that c -> f didnt spike temp.
+RANGE_K = [273, 283, 293, 303, 313, 323]    # looks a little odd due to the formula
 
 class ThermostatCardAIO(html.Div):
     class ids:
@@ -151,10 +151,9 @@ class ThermostatCardAIO(html.Div):
         ]
     )
     def update_thermostat_card(segment, checked, unit, data):
-        if data:
-            temp = float(data.get("val"))
+        temp = data.get("val") if data else None
+        missing = True if temp == "missing" else False
 
-        # range
         if unit == "c":
             range = RANGE_C
         elif unit == "k":
@@ -165,7 +164,6 @@ class ThermostatCardAIO(html.Div):
         thermometer_min = range[0]
         thermometer_max = range[-1]
         
-        # scale 
         scale_color = "#C9C9C9" if checked else "#454545"   
         thermometer_scale = {
             "custom": {
@@ -174,43 +172,45 @@ class ThermostatCardAIO(html.Div):
             }
         }
 
-        # IF ON: display
+        # SENSOR ON
         if segment == "ON":
             hidden = False
 
-            if unit == "f":
-                temp = c_to_f(temp)
-                unit = f" °{unit.upper()}"
-            elif unit == "k":
-                temp = c_to_k(temp)
-                unit = "K"
+            # IF ON, but no reading: display N/A
+            if missing:
+                reading = "N/A"
             else:
-                unit = f" °{unit.upper()}"
+                temp = float(temp)
+                if unit == "f":
+                    temp = c_to_f(temp)
+                    unit = f" °{unit.upper()}"
+                elif unit == "k":
+                    temp = c_to_k(temp)
+                    unit = "K"
+                else:
+                    unit = f" °{unit.upper()}"
 
-            reading = f"{temp}{unit}"
+                reading = f"{temp}{unit}"
 
             segment_value = "ON"
             segment_color = "green"
 
-        # IF OFF: display message
+        # SENSOR OFF
         else:
             hidden = True
-            thermometer_value = 0
-
-            reading = "N/A"
-
+            reading = "Sensor Off"
             segment_value = "OFF"
             segment_color = "red"
 
         return (
-            hidden,
-            temp,
-            thermometer_min,
-            thermometer_max,
-            thermometer_scale,
+            hidden,                     # hidden
+            temp,                       # value
+            thermometer_min,            # min
+            thermometer_max,            # max
+            thermometer_scale,          # scale
 
-            reading,
+            reading,                    # children
 
-            segment_value,
-            segment_color
+            segment_value,              # value
+            segment_color               # color
         )
