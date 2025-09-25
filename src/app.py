@@ -19,10 +19,10 @@ from db.db_methods import DB
 # ===================================================
 #                ENVIRONMENT VARIABLES
 # ===================================================
-HOST    = os.getenv("HOST", "0.0.0.0")
-PORT    = os.getenv("PORT", "8050")
+HOST    = os.getenv("HOST", "0.0.0.0")      # default for if using uv in dev
+PORT    = os.getenv("PORT", "8050")         # ^^^
 SOCK    = os.getenv("SOCK")
-DB_PATH = os.getenv("DB_PATH", "src/database/sqlite/lab1.db")
+DB_URL = os.getenv("DB_URL")
 
 if not HOST:
     raise RuntimeError("HOST env var is not set")
@@ -30,7 +30,7 @@ if not PORT:
     raise RuntimeError("PORT env var is not set")
 if not SOCK:
     raise RuntimeError("SOCK env var is not set")
-if not DB_PATH:
+if not DB_URL:
     raise RuntimeError("DB_PATH env var is not set")
 
 # ===================================================
@@ -57,7 +57,7 @@ INTERVAL = 1
 # ===================================================
 #                 DATABASE OBJECT
 # ===================================================
-DB = DB(db_path=DB_PATH)
+DB = DB(db_path=DB_URL)
 
 # ===================================================
 #                 DASH APPLICATION

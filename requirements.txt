@@ -9,4 +9,5 @@ pandas==2.3.2
 plotly-express==0.4.1
 redis==6.4.0
 sqlalchemy==2.0.43
+psycopg2-binary>=2.9.10
 statsmodels==0.14.5
