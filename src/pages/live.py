@@ -127,28 +127,27 @@ class LivePage:
             try:
                 data = self.red.xrevrange(name="readings", count=300)
                 df = (process_stream(data))
-            except:
-                df = pd.DataFrame(columns=["date", "Sensor 1", "Sensor 2"])    
 
-            try:
                 first_row = df.iloc[[-1]]
                 sensor_1_temp = first_row.iloc[0]["Sensor 1"]
                 sensor_2_temp = first_row.iloc[0]["Sensor 2"]
+
+                temperature_cols = ["Sensor 1", "Sensor 2"]
+                if unit == "f":
+                    df[temperature_cols] = df[temperature_cols].apply(c_to_f)
+                elif unit == "k":
+                    df[temperature_cols] = df[temperature_cols].apply(c_to_k)
+                
+                df["date"] = pd.to_datetime(df["date"], unit="s")
+                df["date"] = df["date"].dt.tz_localize("UTC")
+                df["date"] = df["date"].dt.tz_convert("America/Chicago")
+                df["date"] = df["date"].dt.time
+
             except:
                 first_row = "NO DATA"
                 sensor_1_temp = "missing"
                 sensor_2_temp = "missing"
-
-            temperature_cols = ["Sensor 1", "Sensor 2"]
-            if unit == "f":
-                df[temperature_cols] = df[temperature_cols].apply(c_to_f)
-            elif unit == "k":
-                df[temperature_cols] = df[temperature_cols].apply(c_to_k)
-            
-            df["date"] = pd.to_datetime(df["date"], unit="s")
-            df["date"] = df["date"].dt.tz_localize("UTC")
-            df["date"] = df["date"].dt.tz_convert("America/Chicago")
-            df["date"] = df["date"].dt.time
+                df = pd.DataFrame()    
 
             records = df.to_dict("records")
 

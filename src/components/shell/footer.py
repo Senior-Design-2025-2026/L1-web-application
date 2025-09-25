@@ -32,21 +32,20 @@ def build_footer_col(label: str, links: dict):
 
 
 LINKEDIN_LINKS = {
-    "Steven Austin": "https://wwww.linkedin.com/in/steven-austin-does-not-have-a-linked-in",
+    "Steven Austin": "./404",
     "Sage Marks": "https://www.linkedin.com/in/sage-marks/",
     "Matt Krueger": "https://www.linkedin.com/in/mattnkrueger/",
     "Zack Mulholland": "https://www.linkedin.com/in/zack-mulholland-317914254/",
 }
 
 DOCUMENTATION_LINKS = {
-    "Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-server/blob/main/lab-1.pdf",
-    "Dashboard Code": "https://github.com/Senior-Design-2025-2026",
-    "Embedded Code": "https://github.com/Senior-Design-2025-2026",
+    "Requirements": "https://github.com/Senior-Design-2025-2026/L1-web-application/blob/main/lab-1.pdf",
+    "Source Code": "https://github.com/Senior-Design-2025-2026/ECE-Senior-Design-Lab-1",
     "Lab Report": "./404",
 }
 
 OTHER_PROJECTS_LINKS = {
-    "Lab 1 (Thermometer)": "./404",
+        "Lab 1 (THIS!)": "https://github.com/Senior-Design-2025-2026",
     "Lab 2 (TBD)": "./404",
     "Lab 3 (TBD)": "./404",
     "Final (TBD)": "./404",

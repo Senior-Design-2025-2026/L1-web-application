@@ -19,7 +19,7 @@ class SettingsPage:
         temp_table = dag.AgGrid(
             rowData=temps.to_dict(orient="records"),
             columnDefs=[{"field": i} for i in temps.columns],
-            id="dag-users"
+            id="dag-temps"
         )
 
         users_df = self.DB.get_all_users()
@@ -53,20 +53,21 @@ class SettingsPage:
     def callbacks(self):
         @callback(
             Output("dag-users", "className"),
+            Output("dag-temps", "className"),
             Input("theme", "checked"),
         )
         def update_theme(switch_on):
-            return "ag-theme-alpine-dark" if switch_on else "ag-theme-alpine"
+            color = "ag-theme-alpine-dark" if switch_on else "ag-theme-alpine"
+            return color, color
 
         @callback(
             Output("empty1", "children"),
             Input("test-add", "n_clicks"),
         )
-        def test_add(n_clicks):
-            # TODO, make less dummy
+        def add_user(n_clicks):
             name = "matt"
-            phone_num = "1234phone"
             email_addr = "@gmail.com"
+            name += str(n_clicks)
 
             if ctx.triggered_id == "test-add":          
                 print("adding user (not in place ; connect to postres)")
@@ -75,8 +76,9 @@ class SettingsPage:
                     "add_user", 
                     kwargs={
                         "name": name,
-                        "phone_num": phone_num,
                         "email_addr": email_addr,
+                        "min_thresh_c": 25,
+                        "max_thresh_c": 25,
                     }
                 )
                 return [""]
@@ -85,12 +87,13 @@ class SettingsPage:
             Output("empty2", "children"),
             Input("test-send", "n_clicks"),
         )
-        def test_add(n_clicks):
+        def test_email(n_clicks):
             if ctx.triggered_id == "test-send":          
                 users = {
                     "matt": "mkrue138@gmail.com",
                     "patt": "mkrue138@gmail.com",
                     "catt": "mkrue138@gmail.com",
+
                 }
 
                 for name, email_addr in users.items():
