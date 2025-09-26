@@ -70,8 +70,6 @@ class SettingsPage:
             name += str(n_clicks)
 
             if ctx.triggered_id == "test-add":          
-                print("adding user (not in place ; connect to postres)")
-
                 self.celery_client.send_task(
                     "add_user", 
                     kwargs={

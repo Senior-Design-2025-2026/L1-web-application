@@ -18,21 +18,6 @@ class LivePage:
             self.callbacks()
 
     def layout(self):
-        dropdown = dmc.Select(
-            label="Select your favorite library",
-            placeholder="Select one",
-            id="framework-select",
-            value="pd",
-            data=[
-                {"value": "pd", "label": "Pandas"},
-                {"value": "np", "label": "NumPy"},
-                {"value": "tf", "label": "TensorFlow"},
-                {"value": "torch", "label": "PyTorch"},
-            ],
-            w=200,
-            mb=10,
-        )        
-
         card_1 = ThermostatCardAIO("Sensor 1", aio_id="1", color=SENSOR_1_COLOR)
         card_2 = ThermostatCardAIO("Sensor 2", aio_id="2", color=SENSOR_2_COLOR)
 
@@ -44,7 +29,6 @@ class LivePage:
             justify="center",
             align="center"
         )
-
 
         line_chart = dmc.Card(
             dmc.LineChart(
@@ -74,7 +58,7 @@ class LivePage:
         )
 
         segment = dmc.Select(
-            id="unit-dropdown",
+            id="unit-dropdown-live",
             data=[
                 {"value": "c", "label": "Celcius (°C)"},
                 {"value": "f", "label": "Fahrenheit (°F)"},
@@ -121,7 +105,7 @@ class LivePage:
             Output(ThermostatCardAIO.ids.data("1"), "data"),
             Output(ThermostatCardAIO.ids.data("2"), "data"),
             Input("system-clock", "n_intervals"),
-            Input("unit-dropdown", "value"),
+            Input("unit-dropdown-live", "value"),
         )
         def update_chart(n_intervals, unit):
             try:

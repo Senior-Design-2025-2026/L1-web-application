@@ -150,7 +150,7 @@ class ThermostatCardAIO(html.Div):
         [
             Input(ids.segmented_control(MATCH), 'value'),
             Input("theme", "checked"),
-            Input("unit-dropdown", "value"),
+            Input("unit-dropdown-live", "value"),
             Input(ids.data(MATCH), "data"),
         ]
     )

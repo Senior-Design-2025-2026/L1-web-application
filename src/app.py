@@ -7,7 +7,8 @@ from components.aio.thermostat_card import ThermostatCardAIO
 from pathlib import Path
 
 from pages.live import LivePage
-from pages.analytics import AnalyticsPage
+# from pages.analytics import AnalyticsPage
+from pages.system_architecture import SystemArchitecturePage
 from pages.settings import SettingsPage
 
 from components.shell.header import header
@@ -71,7 +72,8 @@ app = Dash(
 app.title = "Lab 1: ECE Senior Design"
 
 live_page_obj      = LivePage(app=app, redis=red)
-analytics_page_obj = AnalyticsPage(app=app, db=DB)
+system_architecture_obj = SystemArchitecturePage()
+# analytics_page_obj = AnalyticsPage(app=app, db=DB)
 settings_page_obj  = SettingsPage(app=app, db=DB, celery=celery_client)
 
 app.layout = dmc.MantineProvider(
@@ -129,8 +131,10 @@ app.layout = dmc.MantineProvider(
 def display_page(pathname):
     if pathname == '/' or pathname == '/live':
         return live_page_obj.layout()
-    elif pathname == '/analytics':
-        return analytics_page_obj.layout()
+    elif pathname == '/system_architecture':
+        return system_architecture_obj.layout()
+    # elif pathname == '/analytics':
+    #     return analytics_page_obj.layout()
     elif pathname == '/settings':
         return settings_page_obj.layout()
     else:

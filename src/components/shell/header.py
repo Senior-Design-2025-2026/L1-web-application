@@ -7,8 +7,9 @@ LOGO_DARK = "iowa-gold.png"
 LOGO_LIGHT = "iowa-black.png"
 
 PAGE_LINKS= {
+    "System Architecture": "cbi:motion-sensor-temperature",
     "Live": "raphael:temp",    
-    "Analytics": "material-symbols:analytics-outline-rounded",
+    # "Analytics": "material-symbols:analytics-outline-rounded",        # DNF (see src/pages/analytics.py for future iteration)
     "Settings": "tabler:settings",
 }
 
@@ -17,7 +18,8 @@ PAGE_LINKS= {
 page_items = []
 
 for key,val in PAGE_LINKS.items():
-    href = f"/{key.lower()}"
+    lower = key.lower()
+    href = lower.replace(" ", "_")
     page_items.append(
         dmc.NavLink(
             label=dmc.Text(
