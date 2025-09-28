@@ -7,6 +7,9 @@ from utils.process_stream import process_stream
 
 from components.aio.thermostat_card import ThermostatCardAIO
 
+pd.set_option("display.max_rows", 20)
+pd.set_option("display.max_columns", 20)
+
 SENSOR_1_COLOR = "#e85d04"
 SENSOR_2_COLOR = "#ffba08"
 
@@ -108,10 +111,13 @@ class LivePage:
             Input("unit-dropdown-live", "value"),
         )
         def update_chart(n_intervals, unit):
-            try:
-                data = self.red.xrevrange(name="readings", count=300)
-                df = (process_stream(data))
+            data = self.red.xrevrange(name="readings", count=300)
 
+            df = (process_stream(data))
+
+            print("DF", df)
+
+            if df is not None:
                 first_row = df.iloc[[-1]]
                 sensor_1_temp = first_row.iloc[0]["Sensor 1"]
                 sensor_2_temp = first_row.iloc[0]["Sensor 2"]
@@ -126,12 +132,10 @@ class LivePage:
                 df["date"] = df["date"].dt.tz_localize("UTC")
                 df["date"] = df["date"].dt.tz_convert("America/Chicago")
                 df["date"] = df["date"].dt.time
-
-            except:
+            else:
                 first_row = "NO DATA"
                 sensor_1_temp = "missing"
                 sensor_2_temp = "missing"
-                df = pd.DataFrame()    
 
             records = df.to_dict("records")
 

@@ -65,8 +65,8 @@ class SettingsPage:
             Input("test-add", "n_clicks"),
         )
         def add_user(n_clicks):
-            name = "matt"
-            email_addr = "@gmail.com"
+            name = "mnkrueger"
+            email_addr = "@uiowa.edu"
             name += str(n_clicks)
 
             if ctx.triggered_id == "test-add":          
@@ -87,22 +87,13 @@ class SettingsPage:
         )
         def test_email(n_clicks):
             if ctx.triggered_id == "test-send":          
-                users = {
-                    "matt": "mkrue138@gmail.com",
-                    "patt": "mkrue138@gmail.com",
-                    "catt": "mkrue138@gmail.com",
-
-                }
-
-                for name, email_addr in users.items():
-                    message = f"hello {name}!"
-                    self.celery_client.send_task(
-                        "send_email", 
-                        kwargs={
-                            "email_addr": email_addr,
-                            "message": message
-                        }
-                    )
-                    return [""]
+                self.celery_client.send_task(
+                    "send_email", 
+                    kwargs={
+                        "email_addr": "matthew-krueger@uiowa.edu",
+                        "message": "TEST"
+                    }
+                )
+                return [""]
 
 

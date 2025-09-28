@@ -30,12 +30,16 @@ def process_stream(data) -> pd.DataFrame:
         sensor_id = entry.get("sensor_id")
         temperature_c = entry.get("temperature_c")
         records.append([sensor_id, timestamp, temperature_c])
+        print("record", timestamp, sensor_id, temperature_c)
 
     df = pd.DataFrame(records, columns=["sensor_id", "timestamp", "temperature_c"])
 
-    df["sensor_id"] = df["sensor_id"].astype(int)
-    df["timestamp"] = df["timestamp"].astype(int)
+    df["sensor_id"]     = df["sensor_id"].astype(int)
+    df["timestamp"]     = df["timestamp"].astype(int)
     df["temperature_c"] = df["temperature_c"].astype(float)
+
+    print("")
+    print("PERFORMING PIVOT")
 
     pivoted = (
         df.pivot(index="timestamp", columns="sensor_id", values="temperature_c")
@@ -43,12 +47,14 @@ def process_stream(data) -> pd.DataFrame:
     )
 
     pivoted.columns.name = None
-
-    rename_map = {"timestamp": "date"}
-    for sid in pivoted.columns:
-        if isinstance(sid, int):
-            rename_map[sid] = f"Sensor {sid}"
-    pivoted = pivoted.rename(columns=rename_map)
+    pivoted = pivoted.reindex(columns=["timestamp", 1, 2])
+    pivoted = pivoted.rename(
+        columns={
+            "timestamp":"date",
+            1: "Sensor 1",
+            2: "Sensor 2",
+            }
+        )
 
     df = pivoted.reset_index(drop=True)
 
