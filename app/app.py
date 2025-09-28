@@ -117,14 +117,18 @@ def getTemperatureData():
             temperature2 = 10
 
     # Update labels in dashboard
-    if temperature1 == None:
-        dashboard_page_obj.set_temp1_label("Sensor1: Error")
+    if tempData["sensor1Unplugged"]:
+        dashboard_page_obj.set_temp1_label("Sensor 1: Unplugged Sensor")
+    elif tempData["sensor1Temperature"] == None or not tempData["sensor1Enabled"]:
+        dashboard_page_obj.set_temp1_label("Sensor 1: No Data Available")
     else:
         dashboard_page_obj.set_temp1_label("Sensor 1: " + str(int(temperature1)) + " " + dashboard_page_obj.unit)
 
     # Update labels in dashboard
-    if temperature2 == None:
-        dashboard_page_obj.set_temp2_label("Sensor2: Error")
+    if tempData["sensor2Unplugged"]:
+        dashboard_page_obj.set_temp2_label("Sensor 2: Unplugged Sensor")
+    elif tempData["sensor2Temperature"] == None or not tempData["sensor2Enabled"]:
+        dashboard_page_obj.set_temp2_label("Sensor 2: No Data Available")
     else:
         dashboard_page_obj.set_temp2_label("Sensor 2: " + str(int(temperature2)) + " " + dashboard_page_obj.unit)
 
@@ -138,8 +142,9 @@ def getTemperatureData():
     dashboard_page_obj.df.iloc[0, dashboard_page_obj.df.columns.get_loc("temperatureSensor1Data")] = temperature1
     dashboard_page_obj.df.iloc[0, dashboard_page_obj.df.columns.get_loc("temperatureSensor2Data")] = temperature2
 
-    if (settings_page_obj.saved_email is not None and (temperature1 != None and temperature1 > settings_page_obj.max_temperature or 
-        temperature2 != None and temperature2 > settings_page_obj.max_temperature)):
+    if settings_page_obj.saved_email is not None and (
+        (temperature1 is not None and temperature1 > settings_page_obj.max_temperature) or 
+        (temperature2 is not None and temperature2 > settings_page_obj.max_temperature)):
         if not dashboard_page_obj.overThreshold:
             me = "seniordesignteam3@uiowa.edu"
             you = settings_page_obj.saved_email
@@ -157,8 +162,9 @@ def getTemperatureData():
     else:
         dashboard_page_obj.overThreshold = False
 
-    if (settings_page_obj.saved_email is not None and (temperature1 != None and temperature1 < settings_page_obj.min_temperature or 
-        temperature2 != None and temperature2 < settings_page_obj.min_temperature)):
+    if settings_page_obj.saved_email is not None and (
+        (temperature1 is not None and temperature1 < settings_page_obj.min_temperature) or 
+        (temperature2 is not None and temperature2 < settings_page_obj.min_temperature)):
         if not dashboard_page_obj.underThreshold:
             me = "seniordesignteam3@uiowa.edu"
             you = settings_page_obj.saved_email
