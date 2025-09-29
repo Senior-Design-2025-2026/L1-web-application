@@ -26,15 +26,10 @@ def process_stream(data) -> pd.DataFrame:
         2  1758588611     21.40       NaN
     """
     records = []
-    print("PROCESSING")
     for id, entry in data:
         timestamp = id.split("-")[0]
         sensor_id = entry.get("sensor_id")
         raw_temperature_c = entry.get("temperature_c")
-
-        print("")
-        print(entry)
-        print(raw_temperature_c)
 
         temperature_c = json.loads(raw_temperature_c) if raw_temperature_c not in (None, "") else None
 

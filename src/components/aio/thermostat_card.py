@@ -142,7 +142,6 @@ class ThermostatCardAIO(html.Div):
 
             # reading
             Output(ids.value(MATCH), 'children'),
- 
         ],
         [
             Input(ids.segmented_control(MATCH), 'value'),
@@ -152,8 +151,12 @@ class ThermostatCardAIO(html.Div):
         ]
     )
     def update_thermostat_card(segment, checked, unit, data):
-        temp = data.get("val") if data else None
-        missing = False if temp else True
+        temp = data.get("val")                                              # data is passed as a string...
+        if data is None or temp == "None":
+            temp = None
+
+        missing: bool = temp is None
+
 
         if unit == "c":
             range = RANGE_C
@@ -182,18 +185,17 @@ class ThermostatCardAIO(html.Div):
                 reading = "N/A"
                 hidden = True
             else:
-                temperature = float(temp)
+                temp = float(temp)
                 if unit == "f":
-                    temperature = c_to_f(temp)
+                    temp = c_to_f(temp)
                     unit = f" °{unit.upper()}"
                 elif unit == "k":
-                    temperature = c_to_k(temp)
+                    temp = c_to_k(temp)
                     unit = "K"
                 else:
                     unit = f" °{unit.upper()}"
 
-                reading = f"{temperature:.2f}{unit}"
-
+                reading = f"{temp:.2f}{unit}"
 
         # SENSOR OFF
         else:
@@ -202,7 +204,7 @@ class ThermostatCardAIO(html.Div):
 
         return (
             hidden,                     # hidden
-            temperature,                       # value
+            temp,                       # value
             thermometer_min,            # min
             thermometer_max,            # max
             thermometer_scale,          # scale

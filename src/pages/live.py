@@ -18,13 +18,14 @@ def nan_to_none(temp):
     return None if pd.isna(temp) else temp
 
 class LivePage:
-    def __init__(self, app, redis=None):
+    def __init__(self, app, redis):
         self.red = redis
         
         if app is not None:
             self.callbacks()
 
     def layout(self):
+        self.red.set("button_1_status", "ON")
         card_1 = ThermostatCardAIO("Sensor 1", aio_id="1", color=SENSOR_1_COLOR)
         card_2 = ThermostatCardAIO("Sensor 2", aio_id="2", color=SENSOR_2_COLOR)
 
@@ -120,10 +121,6 @@ class LivePage:
 
             df = (process_stream(data))
 
-            print("")
-            print("DF")
-            print(df)
-
             if df is not None:
                 df = df.where(pd.notna(df), None)
                 first_row = df.iloc[[-1]]
@@ -166,51 +163,27 @@ class LivePage:
             return [""]
 
         # ==========================================
-        #          HANDLING SENSOR TOGGLES
+        #            HANDLE SENSOR TOGGLES
         # ==========================================
-        # this was my first time using dash all-in-one (AIO)
-        # components. AIO is very good for creating reusable 
-        # objects, however i found that it is difficult to 
-        # to personalize objects with 'self'. It is not as
-        # simple as adding redis cache to the object to 
-        # access its data specifically. This is because the 
-        # AIO has no idea what it is... There is probably a
-        # much better way of working around this shortcoming
-        # to make AIO truly dynamic. 
         @callback(
-            Output(ThermostatCardAIO.ids.segmented_control("1"), "data"),
+            Output(ThermostatCardAIO.ids.segmented_control("1"), "value"),
             Output(ThermostatCardAIO.ids.segmented_control("1"), "color"),
             Input("system-clock", "n_intervals"),
-            State(ThermostatCardAIO.ids.segmented_control("1"), "value")
+            Input(ThermostatCardAIO.ids.segmented_control("1"), "value")
         )
         def toggle_sensor_1(n_intervals, status):
-            # check with the cache as source of truth
-            # self.red.get("sensor_1_status")
+            curr = self.red.get("button_1_status")
+            if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
+                print("Triggered with value", status)
+                if status != curr:              
+                    print("changing")
+                    self.red.set("button_1_status", status)
+                    curr = status
+                    print("new current", curr)
 
-            if status == "ON":
-                segment_value = "OFF"
-                segment_color = "red"
-            else:
-                segment_value = "ON"
+            if curr == "ON":
                 segment_color = "green"
-
-            return segment_value, segment_color
-
-        @callback(
-            Output(ThermostatCardAIO.ids.segmented_control("2"), "data"),
-            Output(ThermostatCardAIO.ids.segmented_control("2"), "color"),
-            Input("system-clock", "n_intervals"),
-            State(ThermostatCardAIO.ids.segmented_control("2"), "value")
-        )
-        def toggle_sensor_2(n_intervals, status):
-            # check with the cache as source of truth
-            # self.red.get("sensor_2_status")
-
-            if status == "ON":
-                segment_value = "OFF"
-                segment_color = "red"
             else:
-                segment_value = "ON"
-                segment_color = "green"
+                segment_color = "red"
 
-            return segment_value, segment_color
+            return curr, segment_color
