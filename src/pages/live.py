@@ -171,19 +171,22 @@ class LivePage:
             Input("system-clock", "n_intervals"),
             Input(ThermostatCardAIO.ids.segmented_control("1"), "value")
         )
-        def toggle_sensor_1(n_intervals, status):
-            curr = self.red.get("button_1_status")
-            if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
-                print("Triggered with value", status)
-                if status != curr:              
-                    print("changing")
-                    self.red.set("button_1_status", status)
-                    curr = status
-                    print("new current", curr)
+        def toggle_sensor_1(n_intervals, wanted):
+            # 1. get the current status from cache
+            actual = self.red.get("virtual:1:status")
 
-            if curr == "ON":
+            # 2. check for a toggle & send if a toggle
+            if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
+                print("")
+                print("Triggered with value", wanted)
+                print("- curr", actual)
+                print("- new", wanted)
+                if wanted != actual:              
+                    self.red.set("virtual:1:wants_toggle", "true")
+
+            if actual == "ON":
                 segment_color = "green"
             else:
                 segment_color = "red"
 
-            return curr, segment_color
+            return actual, segment_color

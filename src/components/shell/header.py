@@ -7,7 +7,7 @@ LOGO_DARK = "iowa-gold.png"
 LOGO_LIGHT = "iowa-black.png"
 
 PAGE_LINKS= {
-    "System Architecture": "cbi:motion-sensor-temperature",
+    # "System Architecture": "cbi:motion-sensor-temperature",
     "Live": "raphael:temp",    
     # "Analytics": "material-symbols:analytics-outline-rounded",        # DNF (see src/pages/analytics.py for future iteration)
     "Settings": "tabler:settings",
