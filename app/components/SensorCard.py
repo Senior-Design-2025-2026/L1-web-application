@@ -67,7 +67,7 @@ class SensorCard:
         )
 
         reading = html.Div(
-            (str(self._temperature) + self._unit + "°") if self._active and self._temperature is not None else "Sensor Inactive",
+            (str(self._temperature) + self._unit + "°") if self._active and self._temperature is not None else "",
             style = {
                 "font-size": "xlarge",
                 "font-weight": "bolder",
