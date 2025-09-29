@@ -14,7 +14,6 @@ class SettingsPage:
             self.callbacks()
 
     def layout(self) -> html.Div:
-        # on load ---
         temps = self.DB.get_all_temperatures()
         temp_table = dag.AgGrid(
             rowData=temps.to_dict(orient="records"),

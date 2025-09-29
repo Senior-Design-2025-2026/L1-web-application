@@ -1,3 +1,6 @@
+RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified. didnt want to include functions for these
+RANGE_F = [32, 50, 68, 86, 104, 122]        # maybe a different scale so there isnt an illusion that c -> f didnt spike temp.
+RANGE_K = [273, 283, 293, 303, 313, 323]    # looks a little odd due to the formula
 from dash import Input, Output, callback, ctx, html, State
 from numpy import nan_to_num
 import dash_mantine_components as dmc
@@ -6,7 +9,7 @@ from io import StringIO
 from utils.temperature_utils import c_to_f, c_to_k
 from utils.process_stream import process_stream
 
-from components.aio.thermostat_card import ThermostatCardAIO
+from components.aio.thermostat_card import ThermostatCardAIO, RANGE_C, RANGE_F, RANGE_K
 
 pd.set_option("display.max_rows", 20)
 pd.set_option("display.max_columns", 20)
@@ -106,11 +109,15 @@ class LivePage:
         )
 
         return home
+    
+    def get_segment_color(self, status:str):
+        return "green" if status == "ON" else "red"
 
     def callbacks(self):
         @callback(
             Output("readings-chart", "data"),
             Output("readings-chart", "unit"),
+            Output("readings-chart", "yAxisProps"),
             Output(ThermostatCardAIO.ids.data("1"), "data"),
             Output(ThermostatCardAIO.ids.data("2"), "data"),
             Input("system-clock", "n_intervals"),
@@ -123,15 +130,23 @@ class LivePage:
 
             if df is not None:
                 df = df.where(pd.notna(df), None)
-                first_row = df.iloc[[-1]]
-                sensor_1_temp = nan_to_none(first_row.iloc[0]["Sensor 1"])
-                sensor_2_temp = nan_to_none(first_row.iloc[0]["Sensor 2"])
+                try:
+                    first_row = df.iloc[[-1]]
+                    sensor_1_temp = nan_to_none(first_row.iloc[0]["Sensor 1"])
+                    sensor_2_temp = nan_to_none(first_row.iloc[0]["Sensor 2"])
+                except:
+                    sensor_1_temp = None
+                    sensor_2_temp = None
 
                 temperature_cols = ["Sensor 1", "Sensor 2"]
                 if unit == "f":
                     df[temperature_cols] = df[temperature_cols].apply(c_to_f)
+                    range_y = [RANGE_F[0], RANGE_F[-1]]
                 elif unit == "k":
                     df[temperature_cols] = df[temperature_cols].apply(c_to_k)
+                    range_y = [RANGE_K[0], RANGE_K[-1]]
+                else:
+                    range_y = [RANGE_C[0], RANGE_C[-1]]
                 
                 df["date"] = pd.to_datetime(df["date"], unit="s")
                 df["date"] = df["date"].dt.tz_localize("UTC")
@@ -141,6 +156,7 @@ class LivePage:
                 first_row = "NO DATA"
                 sensor_1_temp = None
                 sensor_2_temp = None
+                range_y = [RANGE_C[0], RANGE_C[-1]]
 
             records = df.to_dict("records")
 
@@ -151,7 +167,10 @@ class LivePage:
             thermostat_card_1 = {"val": str(sensor_1_temp)}
             thermostat_card_2 = {"val": str(sensor_2_temp)}
 
-            return records, f"°{unit.upper()}", thermostat_card_1, thermostat_card_2
+            # range of chart
+            yAxisProps = {"domain":range_y}
+
+            return records, f"°{unit.upper()}", yAxisProps, thermostat_card_1, thermostat_card_2
 
         @callback(
             Output("empty", "children"),
@@ -172,21 +191,29 @@ class LivePage:
             Input(ThermostatCardAIO.ids.segmented_control("1"), "value")
         )
         def toggle_sensor_1(n_intervals, wanted):
-            # 1. get the current status from cache
             actual = self.red.get("virtual:1:status")
 
-            # 2. check for a toggle & send if a toggle
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
-                print("")
-                print("Triggered with value", wanted)
-                print("- curr", actual)
-                print("- new", wanted)
                 if wanted != actual:              
                     self.red.set("virtual:1:wants_toggle", "true")
+            
+            segment_color = self.get_segment_color(actual)
 
-            if actual == "ON":
-                segment_color = "green"
-            else:
-                segment_color = "red"
+            return actual, segment_color
+
+        @callback(
+            Output(ThermostatCardAIO.ids.segmented_control("2"), "value"),
+            Output(ThermostatCardAIO.ids.segmented_control("2"), "color"),
+            Input("system-clock", "n_intervals"),
+            Input(ThermostatCardAIO.ids.segmented_control("2"), "value")
+        )
+        def toggle_sensor_2(n_intervals, wanted):
+            actual = self.red.get("virtual:2:status")
+
+            if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("2"):
+                if wanted != actual:              
+                    self.red.set("virtual:2:wants_toggle", "true")
+
+            segment_color = self.get_segment_color(actual)
 
             return actual, segment_color
