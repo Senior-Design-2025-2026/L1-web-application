@@ -30,6 +30,18 @@ def new_user_form_no_updates() -> tuple:
         no_update,
     )
 
+def new_user_alert_props(alert_type:str) -> tuple:
+    if alert_type == "e1":
+        return (False, "red", "Error: one or more inputs are empty")
+    elif alert_type == "e2":
+        return (False, "red", "Error: a non-uiowa edu email was inputted")
+    elif alert_type == "e3":
+        return (False, "red", "Error: email already exists")
+    elif alert_type == "s":
+        return (False, "green", "Success: user added!")
+    else:
+        return (True, None, None, None)
+
 def new_user_form():
     # name
     form_name = dmc.TextInput(
