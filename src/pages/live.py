@@ -60,6 +60,7 @@ class LivePage:
 
                 withDots="True",
                 withLegend=True,
+                connectNulls=False,
             ),
             withBorder=True,
         )
