@@ -1,9 +1,10 @@
-from dash import html, Output, Input, callback, ctx
+from dash import html, Output, Input, callback, ctx, State
 import dash_ag_grid as dag
 import os
 import dash_mantine_components as dmc
 from celery import Celery
 from db.db_methods import DB
+from components.user_form import new_user_form
 
 class SettingsPage:
     def __init__(self, app, db: DB, celery: Celery):
@@ -14,85 +15,35 @@ class SettingsPage:
             self.callbacks()
 
     def layout(self) -> html.Div:
-        temps = self.DB.get_all_temperatures()
-        temp_table = dag.AgGrid(
-            rowData=temps.to_dict(orient="records"),
-            columnDefs=[{"field": i} for i in temps.columns],
-            id="dag-temps"
-        )
-
-        users_df = self.DB.get_all_users()
-        user_table = dag.AgGrid(
-            rowData=users_df.to_dict(orient="records"),
-            columnDefs=[{"field": i} for i in users_df.columns],
-            id="dag-users"
-        )
-
-        test_btn = dmc.Button(
-            id="test-add",
-            children="Test Add"
-        )
-
-        test_send = dmc.Button(
-            id="test-send",
-            children="Test Send"
+        new_user_modal_btn = dmc.Button(
+                id="new-user-modal-btn",
+                children=["Add User"]
         )
 
         return dmc.Stack(
             [
-                temp_table, 
-                user_table, 
-                test_btn, 
-                test_send,
-                html.Div(id="empty1"),
-                html.Div(id="empty2")
+                new_user_modal_btn,
+                new_user_form()
             ]
         )
 
     def callbacks(self):
         @callback(
-            Output("dag-users", "className"),
-            Output("dag-temps", "className"),
-            Input("theme", "checked"),
+            Output("new-user-modal", "opened"),
+            Input("new-user-submit", "n_clicks"),
+            Input("new-user-cancel", "n_clicks"),
+            Input("new-user-modal-btn", "n_clicks"),
+            State("new-user-modal", "opened"),
+            prevent_initial_call=True,
         )
-        def update_theme(switch_on):
-            color = "ag-theme-alpine-dark" if switch_on else "ag-theme-alpine"
-            return color, color
+        def new_user_modal(submit, cancel, open, opened):
+            if ctx.triggered == "new-user-modal-btn":
+                print("OPEN CLICKED")
+            if ctx.triggered == "new-user-submit":
+                print("SUBMIT CLICKED")
+            if ctx.triggered == "new-user-cancel":
+                print("CANCEL CLICKED")
+            if ctx.triggered == "new-user-cancel":
+                print("CANCEL CLICKED")
 
-        @callback(
-            Output("empty1", "children"),
-            Input("test-add", "n_clicks"),
-        )
-        def add_user(n_clicks):
-            name = "mnkrueger"
-            email_addr = "@uiowa.edu"
-            name += str(n_clicks)
-
-            if ctx.triggered_id == "test-add":          
-                self.celery_client.send_task(
-                    "add_user", 
-                    kwargs={
-                        "name": name,
-                        "email_addr": email_addr,
-                        "min_thresh_c": 25,
-                        "max_thresh_c": 25,
-                    }
-                )
-                return [""]
-
-        @callback(
-            Output("empty2", "children"),
-            Input("test-send", "n_clicks"),
-        )
-        def test_email(n_clicks):
-            if ctx.triggered_id == "test-send":          
-                self.celery_client.send_task(
-                    "send_email", 
-                    kwargs={
-                        "email_addr": "matthew-krueger@uiowa.edu",
-                        "message": "TEST"
-                    }
-                )
-                return [""]
-
-
+            return not opened
