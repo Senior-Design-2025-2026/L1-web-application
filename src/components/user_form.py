@@ -1,40 +1,71 @@
 from ctypes import alignment
-from dash import html, Output, Input, callback, ctx
+from dash import html, Output, Input, callback, ctx, no_update
+from dash_iconify import DashIconify
 import dash_ag_grid as dag
 import os
 import dash_mantine_components as dmc
 
+DEFAULT_NAME_PLACEHOLDER = "Your Name"
+DEFAULT_EMAIL_PLACEHOLDER = "Your Email"
+DEFAULT_MIN_THRESH = 10
+DEFAULT_MAX_THRESH = 30
+
+def new_user_form_defaults() -> tuple:
+    return (
+        DEFAULT_MIN_THRESH,
+        DEFAULT_MAX_THRESH,
+        DEFAULT_NAME_PLACEHOLDER,
+        None,
+        DEFAULT_NAME_PLACEHOLDER,
+        None
+    )
+
+def new_user_form_no_updates() -> tuple:
+    return (
+        no_update,
+        no_update,
+        no_update,
+        no_update,
+        no_update,
+        no_update,
+    )
+
 def new_user_form():
     # name
     form_name = dmc.TextInput(
-        label="Username",
-        w=200
+        id="new-user-name",
+        label="Name",
+        placeholder="Your Name",
+        required=True,
     )
 
     # email
     form_email = dmc.TextInput(
-        label="Email Address",
-        w=200
+        id="new-user-email",
+        label="Your Email",
+        placeholder="Your Name",
+        description="Must be a University of Iowa email (@uiowa.edu)",
+        required=True,
     )
 
     # threshold min
     form_min_threshold_c = dmc.NumberInput(
+        id="new-user-min-thresh",
         label="Minimum Threshold (°C)",
         min=0,
         max=50,
         value=10,
         step=1,
-        w=200
     ) 
 
     # threshold max
     form_max_threshold_c = dmc.NumberInput(
+        id="new-user-max-thresh",
         label="Maximum Threshold (°C)",
         min=0,
         max=50,
         value=30,
         step=1,
-        w=200
     ) 
 
     threshold_row = dmc.Group(
@@ -42,7 +73,7 @@ def new_user_form():
             form_min_threshold_c, form_max_threshold_c
         ],
         align="center",
-        justify="space-between"
+        justify="space-between",
     )
 
     submit_button = dmc.Button(
@@ -63,7 +94,8 @@ def new_user_form():
             submit_button, 
             cancel_button
         ], 
-        justify="flex-end"
+        justify="flex-end",
+        mt="md"
     )
 
     form = dmc.Stack(
@@ -75,8 +107,15 @@ def new_user_form():
         ]
     )
 
+    title = dmc.Center(
+        [
+            DashIconify(icon="ri:user-add-fill"),
+            dmc.Text("New User", fz="h3", ml="md"),
+        ]
+    )
+
     modal = dmc.Modal(
-        title="New User",
+        title=title,
         id="new-user-modal",
         children=[
             form        
