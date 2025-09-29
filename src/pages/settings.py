@@ -69,13 +69,29 @@ class SettingsPage:
 
             # if user clicks submit button
             if trigger == "new-user-submit":
-                print("SUBMIT CLICKED")
 
-                # check for existence of username (pk)
+                # 1. check for fields
+                if None in (min_thresh, max_thresh, email_addr, username):
+                    print("ERROR - one or more missing fields")
+                    success = False
 
-                # add user to the database
-                # if there is an error, raise toast
-                success = True
+                # 2. check for existence of email (pk)
+                exists = self.DB.does_email_exist(email_addr)
+                if not exists:
+                    self.celery_client.send_task(
+                        "add_user", 
+                        kwargs={
+                            "name":username,
+                            "email_addr":email_addr,
+                            "min_thresh_c":min_thresh,
+                            "max_thresh_c":max_thresh,
+                        }
+                    )
+                    success = True
+                else:
+                    print("ERROR - User exists!")
+                    success = False
+
                 if success:
                     return False, *new_user_form_defaults()
                 else:
@@ -83,7 +99,6 @@ class SettingsPage:
 
             # cancel transaction
             if trigger == "new-user-cancel":
-                print("CANCEL CLICKED")
                 return False, *new_user_form_defaults()
 
             else:
