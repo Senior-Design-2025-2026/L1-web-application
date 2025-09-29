@@ -108,10 +108,10 @@ class SensorCard:
             if n == 0:
                 # method to get the current status from redis
                 # for now set on
-                return self._layout(), "Turn Off", False
+                return self._layout(), "Toggle", False
             elif n and self._active:
                 self.turn_off()
-                return self._layout(), "Turn On", True
+                return self._layout(), "Toggle", True
             elif n and not self._active:
                 self.turn_on()
-                return self._layout(), "Turn Off", True
+                return self._layout(), "Toggle", True
