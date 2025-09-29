@@ -143,9 +143,6 @@ class ThermostatCardAIO(html.Div):
             # reading
             Output(ids.value(MATCH), 'children'),
  
-            # segment toggle
-            Output(ids.segmented_control(MATCH), 'value'),
-            Output(ids.segmented_control(MATCH), 'color'),
         ],
         [
             Input(ids.segmented_control(MATCH), 'value'),
@@ -156,7 +153,7 @@ class ThermostatCardAIO(html.Div):
     )
     def update_thermostat_card(segment, checked, unit, data):
         temp = data.get("val") if data else None
-        missing = True if temp == "missing" else False
+        missing = False if temp else True
 
         if unit == "c":
             range = RANGE_C
@@ -185,37 +182,30 @@ class ThermostatCardAIO(html.Div):
                 reading = "N/A"
                 hidden = True
             else:
-                temp = float(temp)
+                temperature = float(temp)
                 if unit == "f":
-                    temp = c_to_f(temp)
+                    temperature = c_to_f(temp)
                     unit = f" °{unit.upper()}"
                 elif unit == "k":
-                    temp = c_to_k(temp)
+                    temperature = c_to_k(temp)
                     unit = "K"
                 else:
                     unit = f" °{unit.upper()}"
 
-                reading = f"{temp:.2f}{unit}"
+                reading = f"{temperature:.2f}{unit}"
 
-            segment_value = "ON"
-            segment_color = "green"
 
         # SENSOR OFF
         else:
             hidden = True
             reading = "Sensor Off"
-            segment_value = "OFF"
-            segment_color = "red"
 
         return (
             hidden,                     # hidden
-            temp,                       # value
+            temperature,                       # value
             thermometer_min,            # min
             thermometer_max,            # max
             thermometer_scale,          # scale
 
             reading,                    # children
-
-            segment_value,              # value
-            segment_color               # color
         )

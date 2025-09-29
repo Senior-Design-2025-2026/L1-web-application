@@ -1,4 +1,5 @@
-from dash import Input, Output, callback, ctx, html
+from dash import Input, Output, callback, ctx, html, State
+from numpy import nan_to_num
 import dash_mantine_components as dmc
 import pandas as pd
 from io import StringIO
@@ -12,6 +13,9 @@ pd.set_option("display.max_columns", 20)
 
 SENSOR_1_COLOR = "#e85d04"
 SENSOR_2_COLOR = "#ffba08"
+
+def nan_to_none(temp):
+    return None if pd.isna(temp) else temp
 
 class LivePage:
     def __init__(self, app, redis=None):
@@ -115,12 +119,15 @@ class LivePage:
 
             df = (process_stream(data))
 
-            print("DF", df)
+            print("")
+            print("DF")
+            print(df)
 
             if df is not None:
+                df = df.where(pd.notna(df), None)
                 first_row = df.iloc[[-1]]
-                sensor_1_temp = first_row.iloc[0]["Sensor 1"]
-                sensor_2_temp = first_row.iloc[0]["Sensor 2"]
+                sensor_1_temp = nan_to_none(first_row.iloc[0]["Sensor 1"])
+                sensor_2_temp = nan_to_none(first_row.iloc[0]["Sensor 2"])
 
                 temperature_cols = ["Sensor 1", "Sensor 2"]
                 if unit == "f":
@@ -134,8 +141,8 @@ class LivePage:
                 df["date"] = df["date"].dt.time
             else:
                 first_row = "NO DATA"
-                sensor_1_temp = "missing"
-                sensor_2_temp = "missing"
+                sensor_1_temp = None
+                sensor_2_temp = None
 
             records = df.to_dict("records")
 
@@ -145,6 +152,7 @@ class LivePage:
             # will ultimately trigger the AIO callbacks simulatneously. 
             thermostat_card_1 = {"val": str(sensor_1_temp)}
             thermostat_card_2 = {"val": str(sensor_2_temp)}
+
             return records, f"°{unit.upper()}", thermostat_card_1, thermostat_card_2
 
         @callback(
@@ -155,3 +163,53 @@ class LivePage:
             if ctx.triggered_id == "clear-stream":          
                 self.red.delete("readings")
             return [""]
+
+        # ==========================================
+        #          HANDLING SENSOR TOGGLES
+        # ==========================================
+        # this was my first time using dash all-in-one (AIO)
+        # components. AIO is very good for creating reusable 
+        # objects, however i found that it is difficult to 
+        # to personalize objects with 'self'. It is not as
+        # simple as adding redis cache to the object to 
+        # access its data specifically. This is because the 
+        # AIO has no idea what it is... There is probably a
+        # much better way of working around this shortcoming
+        # to make AIO truly dynamic. 
+        @callback(
+            Output(ThermostatCardAIO.ids.segmented_control("1"), "data"),
+            Output(ThermostatCardAIO.ids.segmented_control("1"), "color"),
+            Input("system-clock", "n_intervals"),
+            State(ThermostatCardAIO.ids.segmented_control("1"), "value")
+        )
+        def toggle_sensor_1(n_intervals, status):
+            # check with the cache as source of truth
+            # self.red.get("sensor_1_status")
+
+            if status == "ON":
+                segment_value = "OFF"
+                segment_color = "red"
+            else:
+                segment_value = "ON"
+                segment_color = "green"
+
+            return segment_value, segment_color
+
+        @callback(
+            Output(ThermostatCardAIO.ids.segmented_control("2"), "data"),
+            Output(ThermostatCardAIO.ids.segmented_control("2"), "color"),
+            Input("system-clock", "n_intervals"),
+            State(ThermostatCardAIO.ids.segmented_control("2"), "value")
+        )
+        def toggle_sensor_2(n_intervals, status):
+            # check with the cache as source of truth
+            # self.red.get("sensor_2_status")
+
+            if status == "ON":
+                segment_value = "OFF"
+                segment_color = "red"
+            else:
+                segment_value = "ON"
+                segment_color = "green"
+
+            return segment_value, segment_color

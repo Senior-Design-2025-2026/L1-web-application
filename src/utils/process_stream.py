@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 
 def process_stream(data) -> pd.DataFrame:
     """
@@ -25,21 +26,29 @@ def process_stream(data) -> pd.DataFrame:
         2  1758588611     21.40       NaN
     """
     records = []
+    print("PROCESSING")
     for id, entry in data:
         timestamp = id.split("-")[0]
         sensor_id = entry.get("sensor_id")
-        temperature_c = entry.get("temperature_c")
+        raw_temperature_c = entry.get("temperature_c")
+
+        print("")
+        print(entry)
+        print(raw_temperature_c)
+
+        try:
+            temperature_c = json.loads(raw_temperature_c) if raw_temperature_c not in (None, "") else None
+        except Exception as e:
+            print("EXCEPTION....",e)
+            temperature_c = None
+
         records.append([sensor_id, timestamp, temperature_c])
-        print("record", timestamp, sensor_id, temperature_c)
 
     df = pd.DataFrame(records, columns=["sensor_id", "timestamp", "temperature_c"])
 
     df["sensor_id"]     = df["sensor_id"].astype(int)
     df["timestamp"]     = df["timestamp"].astype(int)
     df["temperature_c"] = df["temperature_c"].astype(float)
-
-    print("")
-    print("PERFORMING PIVOT")
 
     pivoted = (
         df.pivot(index="timestamp", columns="sensor_id", values="temperature_c")
@@ -50,9 +59,9 @@ def process_stream(data) -> pd.DataFrame:
     pivoted = pivoted.reindex(columns=["timestamp", 1, 2])
     pivoted = pivoted.rename(
         columns={
-            "timestamp":"date",
-            1: "Sensor 1",
-            2: "Sensor 2",
+                "timestamp":"date",
+                1: "Sensor 1",
+                2: "Sensor 2",
             }
         )
 
