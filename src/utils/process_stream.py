@@ -36,11 +36,7 @@ def process_stream(data) -> pd.DataFrame:
         print(entry)
         print(raw_temperature_c)
 
-        try:
-            temperature_c = json.loads(raw_temperature_c) if raw_temperature_c not in (None, "") else None
-        except Exception as e:
-            print("EXCEPTION....",e)
-            temperature_c = None
+        temperature_c = json.loads(raw_temperature_c) if raw_temperature_c not in (None, "") else None
 
         records.append([sensor_id, timestamp, temperature_c])
 
