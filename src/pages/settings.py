@@ -5,7 +5,8 @@ import dash_mantine_components as dmc
 from celery import Celery
 from db.db_methods import DB
 
-from components.user_form import new_user_form, new_user_form_defaults, new_user_form_no_updates, new_user_alert_props
+from components.new_user_form import new_user_form, new_user_form_defaults, new_user_form_no_updates, new_user_alert_props
+# from components.update_user_form import update_user_form, update_user_form_defaults, update_user_form_no_updates, update_user_alert_props
 
 class SettingsPage:
     def __init__(self, app, db: DB, celery: Celery):
@@ -29,10 +30,18 @@ class SettingsPage:
                 hide=True,
             )
 
+        users_df = self.DB.get_all_users()
+        user_table = dag.AgGrid(
+            rowData=users_df.to_dict(orient="records"),
+            columnDefs=[{"field": i} for i in users_df.columns],
+            id="dag-users"
+        )
+
         return dmc.Stack(
             [
                 new_user_modal_alert,
                 new_user_modal_btn,
+                user_table,
                 new_user_form()
             ]
         )
@@ -126,3 +135,10 @@ class SettingsPage:
             else:
                 return False, *(True, None, None), *new_user_form_no_updates()
 
+        @callback(
+            Output("dag-users", "className"),
+            Input("theme", "checked"),
+        )
+        def update_theme(switch_on):
+            color = "ag-theme-alpine-dark" if switch_on else "ag-theme-alpine"
+            return color

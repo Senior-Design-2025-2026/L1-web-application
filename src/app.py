@@ -2,13 +2,13 @@ from dash import Dash, html, dcc, Input, Output, ctx
 import dash_mantine_components as dmc
 import redis
 import os
+import json
+import pandas as pd
 from components.aio.thermostat_card import ThermostatCardAIO
 
 from pathlib import Path
 
 from pages.live import LivePage
-# from pages.analytics import AnalyticsPage
-# from pages.system_architecture import SystemArchitecturePage
 from pages.settings import SettingsPage
 
 from components.shell.header import header
@@ -17,13 +17,19 @@ from celery import Celery
 
 from db.db_methods import DB
 
-# ===================================================
-#                ENVIRONMENT VARIABLES
-# ===================================================
+# =================================================== #
+#                                                     #
+#                                                     #
+#                   SETUP APPLICATION                 #
+#                                                     #
+#                                                     #
+# =================================================== #
+# ENVIRONMENT VARIABLES
 HOST      = os.getenv("HOST", "localhost")         
 DASH_PORT = os.getenv("DASH_PORT", "8050")         
 SOCK      = os.getenv("SOCK")
 DB_URL    = os.getenv("DB_URL")
+INTERVAL = 1
 
 if not HOST:
     raise RuntimeError("HOST env var is not set")
@@ -34,31 +40,28 @@ if not SOCK:
 if not DB_URL:
     raise RuntimeError("DB_PATH env var is not set")
 
-# ===================================================
-#                REDIS STREAM + CACHE
-# ===================================================
+# DATABASE
+DB = DB(db_path=DB_URL)
+
+# REDIS STREAM + CACHE
 red = redis.Redis(
     unix_socket_path=SOCK,
     decode_responses=True
 )
 
-# ===================================================
-#                CELERY TASK QUEUE
-# ===================================================
+# setup the user threshold dataframe to check
+user_df: pd.DataFrame = DB.get_all_users()
+if user_df is not None:
+    user_records = user_df.to_dict()
+    print(user_records)
+
+    red.set("users_df", json.dumps(user_records))
+
+# CELERY TASK QUEUE
 celery_client = Celery(
     main=__name__,
     broker=f"redis+socket://{SOCK}",
 )
-
-# ===================================================
-#                 SYSTEM CLOCK 
-# ===================================================
-INTERVAL = 1
-
-# ===================================================
-#                 DATABASE OBJECT
-# ===================================================
-DB = DB(db_path=DB_URL)
 
 # ===================================================
 #                 DASH APPLICATION
@@ -121,9 +124,7 @@ app.layout = dmc.MantineProvider(
     ],
 )
 
-# ===================================================
-#                FLASK HTTP ROUTING
-# ===================================================
+# PAGE ROUTING
 @app.callback(
     Output('page-content', 'children'),
     Input('url', 'pathname')
@@ -140,6 +141,13 @@ def display_page(pathname):
     else:
         return html.Div("404 Page Not Found")
 
+# =================================================== #
+#                                                     #
+#                                                     #
+#                   START APPLICATION                 #
+#                                                     #
+#                                                     #
+# =================================================== #
 if __name__ == '__main__':
     app.run(
         debug=True,

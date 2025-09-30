@@ -124,9 +124,10 @@ class LivePage:
             Input("unit-dropdown-live", "value"),
         )
         def update_chart(n_intervals, unit):
-            data = self.red.xrevrange(name="readings", count=300)
+            data_1 = self.red.xrevrange(name="readings:1", count=300)
+            data_2 = self.red.xrevrange(name="readings:2", count=300)
 
-            df = (process_stream(data))
+            df = (process_stream(data_1, data_2))
 
             if df is not None:
                 df = df.where(pd.notna(df), None)
