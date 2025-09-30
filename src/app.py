@@ -4,7 +4,6 @@ import redis
 import os
 import json
 import pandas as pd
-from components.aio.thermostat_card import ThermostatCardAIO
 
 from pathlib import Path
 
@@ -75,9 +74,7 @@ app = Dash(
 app.title = "Lab 1: ECE Senior Design"
 
 live_page_obj      = LivePage(app=app, redis=red)
-# system_architecture_obj = SystemArchitecturePage()
-# analytics_page_obj = AnalyticsPage(app=app, db=DB)
-settings_page_obj  = SettingsPage(app=app, db=DB, celery=celery_client)
+settings_page_obj  = SettingsPage(app=app, db=DB, redis=red, celery=celery_client)
 
 app.layout = dmc.MantineProvider(
     theme={
@@ -132,10 +129,6 @@ app.layout = dmc.MantineProvider(
 def display_page(pathname):
     if pathname == '/' or pathname == '/live':
         return live_page_obj.layout()
-    # elif pathname == '/system_architecture':
-    #     return system_architecture_obj.layout()
-    # elif pathname == '/analytics':
-    #     return analytics_page_obj.layout()
     elif pathname == '/settings':
         return settings_page_obj.layout()
     else:

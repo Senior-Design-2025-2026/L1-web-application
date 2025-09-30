@@ -9,7 +9,7 @@ from io import StringIO
 from utils.temperature_utils import c_to_f, c_to_k
 from utils.process_stream import process_stream
 
-from components.aio.thermostat_card import ThermostatCardAIO, RANGE_C, RANGE_F, RANGE_K
+from components.aio.thermostat_card import ThermostatCardAIO, RANGE_C, RANGE_F
 
 pd.set_option("display.max_rows", 20)
 pd.set_option("display.max_columns", 20)
@@ -74,7 +74,6 @@ class LivePage:
             data=[
                 {"value": "c", "label": "Celcius (°C)"},
                 {"value": "f", "label": "Fahrenheit (°F)"},
-                {"value": "k", "label": "Kelvin (K)"},
             ],
             value="c",
             size="md",
@@ -143,9 +142,6 @@ class LivePage:
                 if unit == "f":
                     df[temperature_cols] = df[temperature_cols].apply(c_to_f)
                     range_y = [RANGE_F[0], RANGE_F[-1]]
-                elif unit == "k":
-                    df[temperature_cols] = df[temperature_cols].apply(c_to_k)
-                    range_y = [RANGE_K[0], RANGE_K[-1]]
                 else:
                     range_y = [RANGE_C[0], RANGE_C[-1]]
                 
@@ -179,7 +175,8 @@ class LivePage:
         )
         def clear_stream(n_clicks):
             if ctx.triggered_id == "clear-stream":          
-                self.red.delete("readings")
+                self.red.delete("readings:1")
+                self.red.delete("readings:2")
             return [""]
 
         # ==========================================

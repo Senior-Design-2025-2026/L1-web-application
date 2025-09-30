@@ -7,7 +7,6 @@ import uuid
 
 RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified. didnt want to include functions for these
 RANGE_F = [32, 50, 68, 86, 104, 122]        # maybe a different scale so there isnt an illusion that c -> f didnt spike temp.
-RANGE_K = [273, 283, 293, 303, 313, 323]    # looks a little odd due to the formula
 
 class ThermostatCardAIO(html.Div):
     class ids:
@@ -157,13 +156,10 @@ class ThermostatCardAIO(html.Div):
 
         missing: bool = temp is None
 
-
-        if unit == "c":
-            range = RANGE_C
-        elif unit == "k":
-            range = RANGE_K
-        elif unit == "f":
+        if unit == "f":
             range = RANGE_F
+        else:
+            range = RANGE_C
 
         thermometer_min = range[0]
         thermometer_max = range[-1]

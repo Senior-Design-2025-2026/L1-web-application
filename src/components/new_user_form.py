@@ -40,7 +40,7 @@ def new_user_alert_props(alert_type:str) -> tuple:
     elif alert_type == "s":
         return (False, "green", "Success: user added!")
     else:
-        return (True, None, None, None)
+        return (True, None, None)
 
 def new_user_form():
     # name
@@ -54,8 +54,8 @@ def new_user_form():
     # email
     form_email = dmc.TextInput(
         id="new-user-email",
-        label="Your Email",
-        placeholder="Your Name",
+        label="Email",
+        placeholder="user@uiowa.edu",
         description="Must be a University of Iowa email (@uiowa.edu)",
         required=True,
     )
@@ -121,7 +121,7 @@ def new_user_form():
 
     title = dmc.Center(
         [
-            DashIconify(icon="ri:user-add-fill"),
+            DashIconify(icon="ri:user-add-fill", width=30),
             dmc.Text("New User", fz="h3", ml="md"),
         ]
     )
