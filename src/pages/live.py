@@ -182,6 +182,10 @@ class LivePage:
         # ==========================================
         #            HANDLE SENSOR TOGGLES
         # ==========================================
+        # these poll the status of the physical system to detect if on / off / unplugged
+        # if clicked, it updates the redis status which is read when data comes in
+        # if the status has changed, then the http response to the embedded device says
+        # to toggle the button.
         @callback(
             Output(ThermostatCardAIO.ids.segmented_control("1"), "value"),
             Output(ThermostatCardAIO.ids.segmented_control("1"), "color"),
@@ -190,8 +194,11 @@ class LivePage:
         )
         def toggle_sensor_1(n_intervals, wanted):
             actual = self.red.get("virtual:1:status")
-
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
+                print("SENSOR 1 CLICKED!")
+                print("- status:", actual)
+                print("- wanted:", wanted)
+
                 if wanted != actual:              
                     self.red.set("virtual:1:wants_toggle", "true")
             
@@ -207,8 +214,11 @@ class LivePage:
         )
         def toggle_sensor_2(n_intervals, wanted):
             actual = self.red.get("virtual:2:status")
-
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("2"):
+                print("SENSOR 2 CLICKED!")
+                print("- status:", actual)
+                print("- wanted:", wanted)
+
                 if wanted != actual:              
                     self.red.set("virtual:2:wants_toggle", "true")
 

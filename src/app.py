@@ -52,7 +52,6 @@ red = redis.Redis(
 user_df: pd.DataFrame = DB.get_all_users()
 if user_df is not None:
     user_records = user_df.to_dict()
-    print(user_records)
 
     red.set("users_df", json.dumps(user_records))
 
