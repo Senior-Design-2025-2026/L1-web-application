@@ -82,6 +82,9 @@ def update_user_form():
         step=1,
     ) 
 
+    # 
+    # FORM SUBMISSION (BASE)
+    #
     submit_button = dmc.Button(
         id="uu-submit",
         children=["Submit Changes"],
@@ -95,14 +98,49 @@ def update_user_form():
         variant="outline"
     )
 
+    delete_button = dmc.ActionIcon(
+                    DashIconify(
+                        icon="mdi:trash"
+                    ),
+                    id="uu-delete",
+                    size="lg",
+                    color="red"
+                )
+
     button_row = dmc.Group(
         [
-            submit_button, 
-            cancel_button
+            delete_button,
+            dmc.Group(
+                [
+                    submit_button, 
+                    cancel_button,
+                ],
+            ),
         ], 
         justify="flex-end",
         mt="md"
     )
+
+    #
+    # DELETE FORM
+    #
+    confirm_delete_button = dmc.Button(
+        id="uu-delete-confirm",
+        children=["Delete User"],
+        color="red",
+        variant="outline"
+    )
+
+    confirm_delete_cancel_button = dmc.Button(
+        id="uu-delete-cancel-confirm",
+        children=["Cancel"],
+        color="red",
+        variant="outline"
+    )
+
+    #
+    # SUBMIT
+    #
 
     confirm_submit_button = dmc.Button(
         id="uu-submit-confirm",
@@ -119,8 +157,25 @@ def update_user_form():
 
     confirm_button_row = dmc.Group(
         [
-            confirm_submit_button, 
-            confirm_cancel_button
+            dmc.Group(
+                [
+                    confirm_submit_button,
+                    confirm_cancel_button
+                ]
+            )
+        ], 
+        justify="flex-end",
+        mt="md"
+    )
+
+    delete_confirm_button_row = dmc.Group(
+        [
+            dmc.Group(
+                [
+                    confirm_delete_button,
+                    confirm_delete_cancel_button
+                ]
+            )
         ], 
         justify="flex-end",
         mt="md"
@@ -142,11 +197,19 @@ def update_user_form():
                     ],
                 ),
                 dmc.ManagedModal(
-                    id="uu-confirm",
+                    id="uu-update-form-confirm",
                     title="Confirm Update",
                     children=[
                         dmc.Text("Are you sure you want to perform this update?"),
                         confirm_button_row
+                    ],
+                ),
+                dmc.ManagedModal(
+                    id="uu-delete-form-confirm",
+                    title="Confirm Deletion",
+                    children=[
+                        dmc.Text("Are you sure you want to delete this user?"),
+                        delete_confirm_button_row
                     ],
                 ),
             ]
@@ -155,3 +218,15 @@ def update_user_form():
 
     return modal
 
+
+def delete_user_alert_props(alert_type):
+    if alert_type == "e1":
+        return (False, "red", "Error: one or more inputs are empty")
+    elif alert_type == "e2":
+        return (False, "red", "Error: a non-uiowa edu email was inputted")
+    elif alert_type == "e3":
+        return (False, "red", "Error: email already exists")
+    elif alert_type == "s":
+        return (False, "green", "Success: user removed!")
+    else:
+        return (True, None, None)

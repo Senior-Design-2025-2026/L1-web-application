@@ -11,8 +11,7 @@ import json
 
 from db.db_methods import DB
 from components.new_user_form import new_user_form, new_user_form_defaults, new_user_form_no_updates, new_user_alert_props
-from components.update_user_form import get_no_update_fields, update_user_form, get_user_fields, update_user_alert_props, update_user_form_defaults
-
+from components.update_user_form import delete_user_alert_props, get_no_update_fields, update_user_form, get_user_fields, update_user_alert_props, update_user_form_defaults, delete_user_alert_props
 
 class SettingsPage:
     def __init__(self, app, db: DB, redis, celery):
@@ -92,6 +91,7 @@ class SettingsPage:
         )
 
     def handle_submit(self, email_addr, username, min_thresh, max_thresh, celery_task:str):
+        print("HANDLING")
         # 1. check for fields
         fields = [min_thresh, max_thresh, email_addr, username]
         fields = [None if f=="" else f for f in fields]
@@ -118,6 +118,7 @@ class SettingsPage:
             error = ""
             success = True
 
+        print("celery", celery_task)
         # this is VERY poor error handling & NOT prod.
         self.celery_client.send_task(
             celery_task, 
@@ -146,7 +147,7 @@ class SettingsPage:
                     "max_thresh_c": max_thresh,
                 }
                 new = pd.concat([users_df, pd.DataFrame([user])], ignore_index=True)
-            else:
+            elif celery_task == "update_user":
                 mask = users_df["email_addr"] == email_addr
                 row = users_df.loc[mask]
 
@@ -163,6 +164,18 @@ class SettingsPage:
                 users_df.at[idx, "min_thresh_c"] = int(min_thresh)
                 users_df.at[idx, "max_thresh_c"] = int(max_thresh)
 
+                new = users_df
+            elif celery_task == "delete_user":
+                mask = users_df["email_addr"] == email_addr
+                row = users_df.loc[mask]
+
+                if row.empty:
+                    raise ValueError(f"No user found with email {email_addr}")
+                if len(row) > 1:
+                    raise ValueError(f"Multiple users found with email {email_addr}")
+
+                new = users_df.drop(row.index).reset_index(drop=True)
+            else:
                 new = users_df
 
             new_min_thresh = new["min_thresh_c"].max()
@@ -256,10 +269,13 @@ class SettingsPage:
             Output("uu-alert", "color"),
             Output("uu-alert", "children"),
 
+            Input("uu-delete", "n_clicks"),
             Input("uu-submit", "n_clicks"),
             Input("uu-submit-confirm", "n_clicks"),
             Input("uu-cancel", "n_clicks"),
             Input("uu-cancel-confirm", "n_clicks"),
+            Input("uu-delete-confirm", "n_clicks"),
+            Input("uu-delete-cancel-confirm", "n_clicks"),
             Input("uu-open", "n_clicks"),
 
             State("uu-select", "value"),
@@ -268,15 +284,18 @@ class SettingsPage:
             State("uu-max-thresh", "value"),
             prevent_initial_call=True,
         )
-        def update_user_modal(s1, s2, c1, c2, open, email_addr, username, min_thresh, max_thresh):
+        def update_user_modal(a,b,c,d,e,f,g,h,email_addr, username, min_thresh, max_thresh):
             trigger = ctx.triggered_id
             if trigger == "uu-open":
                 return "uu-form", False, *update_user_alert_props(""),
+
             if trigger == "uu-submit":
-                return "uu-confirm", False, *update_user_alert_props("")
+                return "uu-update-form-confirm", False, *update_user_alert_props("")
+
+            if trigger == "uu-delete":
+                return "uu-delete-form-confirm", False, *update_user_alert_props("")
 
             if trigger == "uu-submit-confirm":
-
                 error, success = self.handle_submit(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="update_user")
                 if success:
                     self.update_cache_db(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="update_user")
@@ -284,7 +303,16 @@ class SettingsPage:
                 else:
                     return None, True, *update_user_alert_props(error), 
 
-            if trigger in ("uu-cancel", "uu-cancel-confirm"):
+            if trigger == "uu-delete-confirm":
+                print("DELETING DELETING")
+                error, success = self.handle_submit(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="delete_user")
+                if success:
+                    self.update_cache_db(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="delete_user")
+                    return None, True, *delete_user_alert_props("s")
+                else:
+                    return None, True, *delete_user_alert_props(error), 
+
+            if trigger in ("uu-cancel", "uu-cancel-confirm", "uu-delete-cancel-confirm"):
                 return None, True, *update_user_alert_props("")
 
         @callback(
