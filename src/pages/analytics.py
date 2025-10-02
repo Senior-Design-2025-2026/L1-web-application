@@ -40,9 +40,8 @@
 #         unit_dropdown = dmc.Select(
 #             id="unit-dropdown-analytics",
 #             data=[
-#                 {"value": "c", "label": "Celcius (°C)"},
-#                 {"value": "f", "label": "Fahrenheit (°F)"},
-#                 {"value": "k", "label": "Kelvin (K)"},
+#                 {"value": "C", "label": "Celcius (°C)"},
+#                 {"value": "F", "label": "Fahrenheit (°F)"},
 #             ],
 #             value="c",
 #             size="md",

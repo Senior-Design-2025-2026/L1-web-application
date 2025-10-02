@@ -145,14 +145,11 @@ class ThermostatCardAIO(html.Div):
         [
             Input(ids.segmented_control(MATCH), 'value'),
             Input("theme", "checked"),
-            Input("unit-dropdown-live", "value"),
+            Input("unit-select", "value"),
             Input(ids.data(MATCH), "data"),
         ]
     )
     def update_thermostat_card(segment, checked, unit, data):
-        print("-- --")
-        print("DATA", data)
-        print("temp", data.get("reading"))
 
         if data is None:
             hide_thermo = True
@@ -186,9 +183,9 @@ class ThermostatCardAIO(html.Div):
         # display thermometer
         hide_thermo = False
 
-        if unit == "f":
+        if unit == "F":
             range = RANGE_F
-            temp = c_to_f(temp)
+            temp = c_to_f(float(temp))
         else:
             range = RANGE_C
 
@@ -203,7 +200,7 @@ class ThermostatCardAIO(html.Div):
             }
         }
 
-        unit = f" °{unit.upper()}"
+        unit = f" °{unit}"
 
         value = float(temp)
         reading = f"{value:.2f}{unit}"

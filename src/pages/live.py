@@ -76,15 +76,14 @@ class LivePage:
             withBorder=True,
         )
 
-        segment = dmc.Select(
-            id="unit-dropdown-live",
+        segment = dmc.SegmentedControl(
+            id="unit-select",
             data=[
-                {"value": "c", "label": "Celcius (°C)"},
-                {"value": "f", "label": "Fahrenheit (°F)"},
+                {"value": "C", "label": "Celcius (°C)"},
+                {"value": "F", "label": "Fahrenheit (°F)"},
             ],
-            value="c",
+            value="C",
             size="md",
-            persistence=True
         )
 
         clear = dmc.Button(
@@ -141,9 +140,12 @@ class LivePage:
             Output(ThermostatCardAIO.ids.data("1"), "data"),
             Output(ThermostatCardAIO.ids.data("2"), "data"),
             Input("system-clock", "n_intervals"),
-            Input("unit-dropdown-live", "value"),
+            Input("unit-select", "value"),
         )
         def update_chart(n_intervals, unit):
+            if ctx.triggered_id == "unit-select":       # virtualize (placing here as there is not a physical switch --> no logic needed)
+                self.red.set("temperatureUnit", unit)
+
             data_1 = self.red.xrevrange(name="readings:1", count=300)
             data_2 = self.red.xrevrange(name="readings:2", count=300)
 
@@ -160,7 +162,7 @@ class LivePage:
                     sensor_2_temp = None
 
                 temperature_cols = ["Sensor 1", "Sensor 2"]
-                if unit == "f":
+                if unit == "F":
                     df[temperature_cols] = df[temperature_cols].apply(c_to_f)
                     range_y = [RANGE_F[0], RANGE_F[-1]]
                 else:
@@ -178,11 +180,6 @@ class LivePage:
 
             records = df.to_dict("records")
 
-            # throwing this in for unplugged status... this is becoming very dirty
-            # CLIENT-SIDE CACHE TEMPERATURE READINGS
-            # hacky, but works - was having troubles adding an instance of the redis stream into the AIO component.
-            # using client-side cache to trigger the updates. Works out nicely as the completion of this callback
-            # will ultimately trigger the AIO callbacks simulatneously. 
             is_unplugged_1 = self.red.get("sensor:1:unplugged")
             is_unplugged_2 = self.red.get("sensor:2:unplugged")
 

@@ -52,7 +52,12 @@ user_df: pd.DataFrame = DB.get_all_users()
 if user_df is not None:
     user_records = user_df.to_dict()
 
+    min_thresh = user_df["min_thresh_c"].max()
+    max_thresh = user_df["max_thresh_c"].min()
+
     red.set("users_df", json.dumps(user_records))
+    red.set("maxMinThresh", str(min_thresh))
+    red.set("minMaxThresh", str(max_thresh))
 
 # CELERY TASK QUEUE
 celery_client = Celery(

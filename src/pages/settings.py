@@ -5,6 +5,8 @@ import os
 import dash_mantine_components as dmc
 from celery import Celery
 from dash_iconify import DashIconify
+import pandas as pd
+import json
 
 from db.db_methods import DB
 from components.new_user_form import new_user_form, new_user_form_defaults, new_user_form_no_updates, new_user_alert_props
@@ -179,6 +181,35 @@ class SettingsPage:
                         success = False
 
                 if success:
+                    # append to users df
+                    try:
+                        old = json.loads(self.red.get("users_df"))
+                        users_df = pd.DataFrame.from_dict(old)
+
+                        id = users_df["user_id"].max() + 1
+                        user = {
+                            "user_id": id,
+                            "name":username,
+                            "email_addr": email_addr,
+                            "min_thresh_c": min_thresh,
+                            "max_thresh_c": max_thresh,
+                        }
+                        new = pd.concat([users_df, pd.DataFrame([user])], ignore_index=True)
+
+                        new_min_thresh = new["min_thresh_c"].max()
+                        new_max_thresh = new["max_thresh_c"].min()
+
+                        print("")
+                        print("NEW", new)
+                        print("min", new_min_thresh)
+                        print("max", new_max_thresh)
+
+                        self.red.set("users_df", new.to_json(orient="records"))
+                        self.red.set("maxMinThresh", str(new_min_thresh))
+                        self.red.set("minMaxThresh", str(new_max_thresh))
+                    except Exception as e:
+                        print("Error adding to dataframe", e)
+
                     return False, *new_user_alert_props("s"), *new_user_form_defaults()
                 else:
                     return False, *new_user_alert_props(error), *new_user_form_no_updates()
