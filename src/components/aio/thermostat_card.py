@@ -151,10 +151,13 @@ class ThermostatCardAIO(html.Div):
     )
     def update_thermostat_card(segment, checked, unit, data):
         temp = data.get("val")                                              # data is passed as a string...
-        if data is None or temp == "None":
-            temp = None
 
-        missing: bool = temp is None
+        if data is None or temp in (None, "None", "UNPLUGGED"):
+            missing = True
+        else:
+            temp = temp
+            missing = False
+
 
         if unit == "f":
             range = RANGE_F
@@ -178,8 +181,8 @@ class ThermostatCardAIO(html.Div):
 
             # IF ON, but no reading: display N/A
             if missing:
-                reading = "N/A"
                 hidden = True
+                reading = "Loading..."
             else:
                 temp = float(temp)
                 if unit == "f":
@@ -196,7 +199,10 @@ class ThermostatCardAIO(html.Div):
         # SENSOR OFF
         else:
             hidden = True
-            reading = "Sensor Off"
+            if data == "unplugged":
+                reading = "Sensor Unplugged"
+            else:
+                reading = "Sensor Off"
 
         return (
             hidden,                     # hidden

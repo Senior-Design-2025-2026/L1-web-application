@@ -28,7 +28,6 @@ HOST      = os.getenv("HOST", "localhost")
 DASH_PORT = os.getenv("DASH_PORT", "8050")         
 SOCK      = os.getenv("SOCK")
 DB_URL    = os.getenv("DB_URL")
-INTERVAL = 1
 
 if not HOST:
     raise RuntimeError("HOST env var is not set")
@@ -96,11 +95,6 @@ app.layout = dmc.MantineProvider(
     },
     children=[
         dcc.Location(id='url'),
-        dcc.Interval(
-            id="system-clock",
-            interval=(INTERVAL * 1000),                 # in ms! 
-            n_intervals=0
-        ),
         dmc.AppShell(
             [
                 dmc.AppShellHeader(

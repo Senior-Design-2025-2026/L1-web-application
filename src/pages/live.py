@@ -1,7 +1,4 @@
-RANGE_C = [0, 10, 20, 30, 40, 50]           # hardcoded... this is verified. didnt want to include functions for these
-RANGE_F = [32, 50, 68, 86, 104, 122]        # maybe a different scale so there isnt an illusion that c -> f didnt spike temp.
-RANGE_K = [273, 283, 293, 303, 313, 323]    # looks a little odd due to the formula
-from dash import Input, Output, callback, ctx, html, State
+from dash import Input, Output, callback, ctx, html, State, dcc
 from numpy import nan_to_num
 import dash_mantine_components as dmc
 import pandas as pd
@@ -32,8 +29,18 @@ class LivePage:
         card_1 = ThermostatCardAIO("Sensor 1", aio_id="1", color=SENSOR_1_COLOR)
         card_2 = ThermostatCardAIO("Sensor 2", aio_id="2", color=SENSOR_2_COLOR)
 
-        cards = dmc.Stack(
+        status_badge = dmc.Group(
             [
+                dmc.Text("System Status", fw="700", size="lg"), 
+                dmc.Badge(id="system-status-badge", variant="dot", size="lg")
+            ], 
+            justify="space-between",
+            align="center"
+        )
+
+        system_cards = dmc.Stack(
+            [
+                status_badge,
                 card_1,
                 card_2
             ],
@@ -86,9 +93,20 @@ class LivePage:
             size="md"
         )
 
-        home = dmc.Group(
+        clear = dmc.Button(
+            id="clear-stream",
+            children="Clear",
+            size="md"
+        )
+
+        return dmc.Group(
             [
-                cards,
+                dcc.Interval(
+                    id="system-clock",
+                    interval=500,   
+                    n_intervals=0
+                ),
+                system_cards,
                 dmc.Stack(
                     [
                         dmc.Grid(
@@ -107,10 +125,13 @@ class LivePage:
             ],
         )
 
-        return home
-    
     def get_segment_color(self, status:str):
-        return "green" if status == "ON" else "red"
+        if status == "ON":
+            return "green"
+        elif status == "OFF":
+            return "red"
+        else:
+            return None
 
     def callbacks(self):
         @callback(
@@ -157,10 +178,17 @@ class LivePage:
 
             records = df.to_dict("records")
 
+            # throwing this in for unplugged status... this is becoming very dirty
             # CLIENT-SIDE CACHE TEMPERATURE READINGS
             # hacky, but works - was having troubles adding an instance of the redis stream into the AIO component.
             # using client-side cache to trigger the updates. Works out nicely as the completion of this callback
             # will ultimately trigger the AIO callbacks simulatneously. 
+            status_1 = self.red.get("virtual:1:status")
+            status_2 = self.red.get("virtual:2:status")
+
+            sensor_1_temp = "UNPLUGGED" if status_1 == "UNPLUGGED" else sensor_1_temp
+            sensor_2_temp = "UNPLUGGED" if status_2 == "UNPLUGGED" else sensor_2_temp
+
             thermostat_card_1 = {"val": str(sensor_1_temp)}
             thermostat_card_2 = {"val": str(sensor_2_temp)}
 
@@ -187,6 +215,7 @@ class LivePage:
         # if the status has changed, then the http response to the embedded device says
         # to toggle the button.
         @callback(
+            Output(ThermostatCardAIO.ids.segmented_control("1"), "disabled"),
             Output(ThermostatCardAIO.ids.segmented_control("1"), "value"),
             Output(ThermostatCardAIO.ids.segmented_control("1"), "color"),
             Input("system-clock", "n_intervals"),
@@ -195,18 +224,21 @@ class LivePage:
         def toggle_sensor_1(n_intervals, wanted):
             actual = self.red.get("virtual:1:status")
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
-                print("SENSOR 1 CLICKED!")
-                print("- status:", actual)
-                print("- wanted:", wanted)
-
                 if wanted != actual:              
                     self.red.set("virtual:1:wants_toggle", "true")
             
             segment_color = self.get_segment_color(actual)
 
-            return actual, segment_color
+            if actual == "UNPLUGGED":
+                disabled = True
+                actual = None
+            else:
+                disabled = False
+
+            return disabled, actual, segment_color
 
         @callback(
+            Output(ThermostatCardAIO.ids.segmented_control("2"), "disabled"),
             Output(ThermostatCardAIO.ids.segmented_control("2"), "value"),
             Output(ThermostatCardAIO.ids.segmented_control("2"), "color"),
             Input("system-clock", "n_intervals"),
@@ -215,13 +247,31 @@ class LivePage:
         def toggle_sensor_2(n_intervals, wanted):
             actual = self.red.get("virtual:2:status")
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("2"):
-                print("SENSOR 2 CLICKED!")
-                print("- status:", actual)
-                print("- wanted:", wanted)
 
                 if wanted != actual:              
                     self.red.set("virtual:2:wants_toggle", "true")
 
             segment_color = self.get_segment_color(actual)
 
-            return actual, segment_color
+            if actual == "UNPLUGGED":
+                disabled = True
+                actual = None
+            else:
+                disabled = False
+
+            return disabled, actual, segment_color
+
+        # ==========================================
+        #            HANDLE PHYSICAL SWITCH
+        # ==========================================
+        @callback(
+            Output("system-status-badge", "color"),
+            Output("system-status-badge", "children"),
+            Input("system-clock", "n_intervals"),
+        )
+        def update_status(n_intervals):
+            curr = self.red.get("systemStatus")
+            status = "DISCONNECTED" if curr is None else curr
+            color = "green" if status == "CONNECTED" else "red"
+            return color, [status]
+
