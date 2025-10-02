@@ -61,7 +61,8 @@ class LivePage:
                 tickLine="y",
                 gridAxis="x",
                 withXAxis="True",
-                xAxisLabel="Time (s)",
+                xAxisProps={"domain": [300, 0]}
+   ,            xAxisLabel="Timestamp",
 
                 withYAxis="True",
                 yAxisLabel="Temperature",
@@ -275,6 +276,11 @@ class LivePage:
         def update_status(n_intervals):
             curr = self.red.get("systemStatus")
             status = "DISCONNECTED" if curr is None else curr
-            color = "green" if status == "CONNECTED" else "red"
+            if status == "CONNECTED":
+                color = "green"
+            elif status == "DISCONNECTED":
+                color = "red"
+            else:
+                color = "blue"
             return color, [status]
 

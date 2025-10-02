@@ -14,7 +14,7 @@ def new_user_form_defaults() -> tuple:
     return (
         DEFAULT_MIN_THRESH,
         DEFAULT_MAX_THRESH,
-        DEFAULT_NAME_PLACEHOLDER,
+        DEFAULT_EMAIL_PLACEHOLDER,
         None,
         DEFAULT_NAME_PLACEHOLDER,
         None

@@ -91,7 +91,6 @@ class SettingsPage:
         )
 
     def handle_submit(self, email_addr, username, min_thresh, max_thresh, celery_task:str):
-        print("HANDLING")
         # 1. check for fields
         fields = [min_thresh, max_thresh, email_addr, username]
         fields = [None if f=="" else f for f in fields]
@@ -118,8 +117,6 @@ class SettingsPage:
             error = ""
             success = True
 
-        print("celery", celery_task)
-        # this is VERY poor error handling & NOT prod.
         self.celery_client.send_task(
             celery_task, 
             kwargs={
@@ -156,10 +153,8 @@ class SettingsPage:
                 if len(row) > 1:
                     raise ValueError(f"Multiple users found with email {email_addr}")
 
-                # extract the index of the single row
                 idx = row.index[0]
 
-                # update that row
                 users_df.at[idx, "name"] = username
                 users_df.at[idx, "min_thresh_c"] = int(min_thresh)
                 users_df.at[idx, "max_thresh_c"] = int(max_thresh)
@@ -180,10 +175,6 @@ class SettingsPage:
 
             new_min_thresh = new["min_thresh_c"].max()
             new_max_thresh = new["max_thresh_c"].min()
-
-            print("NEW", new)
-            print("min", new_min_thresh)
-            print("max", new_max_thresh)
 
             self.red.set("users_df", new.to_json(orient="records"))
             self.red.set("maxMinThresh", str(new_min_thresh))
