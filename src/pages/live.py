@@ -1,4 +1,4 @@
-from dash import Input, Output, callback, ctx, html, State, dcc
+from dash import Input, Output, callback, ctx, html, State, dcc, no_update
 from numpy import nan_to_num
 import dash_mantine_components as dmc
 import pandas as pd
@@ -179,8 +179,8 @@ class LivePage:
             is_unplugged_1 = self.red.get("sensor:1:unplugged")
             is_unplugged_2 = self.red.get("sensor:2:unplugged")
 
-            sensor_1_temp = "unplugged" if is_unplugged_1 == "true" else sensor_1_temp
-            sensor_2_temp = "unplugged" if is_unplugged_2 == "true" else sensor_2_temp
+            sensor_1_temp = "UNPLUGGED" if is_unplugged_1 == "true" else sensor_1_temp
+            sensor_2_temp = "UNPLUGGED" if is_unplugged_2 == "true" else sensor_2_temp
 
             thermostat_card_1 = {"reading": str(sensor_1_temp)}
             thermostat_card_2 = {"reading": str(sensor_2_temp)}
@@ -211,24 +211,28 @@ class LivePage:
             Input(ThermostatCardAIO.ids.segmented_control("1"), "value")
         )
         def toggle_sensor_1(n_intervals, wanted):
-            # on / off
+            # virtualize
             actual = self.red.get("virtual:1:status")
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
                 if wanted != actual:              
                     self.red.set("virtual:1:wants_toggle", "true")
-            
-            segment_color = self.get_segment_color(actual)
 
-            # unplugged / disconnected
+            # device status
+            status = self.red.get("systemStatus")
+            if status == "DISCONNECTED":
+                return True, None, None
+
+            if actual == "ON":
+                return False, actual, "green"
+
+            if actual == "OFF":
+                return False, actual, "red"
+
             is_unplugged = self.red.get("sensor:1:unplugged")
-            curr = self.red.get("systemStatus")
-            if is_unplugged == "true" or (curr is not None):
-                disabled = True
-                actual = None
-            else:
-                disabled = False
+            if is_unplugged:
+                return True, None, None
 
-            return disabled, actual, segment_color
+            return no_update, no_update, no_update
 
         @callback(
             Output(ThermostatCardAIO.ids.segmented_control("2"), "disabled"),
@@ -238,25 +242,28 @@ class LivePage:
             Input(ThermostatCardAIO.ids.segmented_control("2"), "value")
         )
         def toggle_sensor_2(n_intervals, wanted):
-            # on / off
+            # virtualize
             actual = self.red.get("virtual:2:status")
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("2"):
-
                 if wanted != actual:              
                     self.red.set("virtual:2:wants_toggle", "true")
 
-            segment_color = self.get_segment_color(actual)
+            # device status
+            status = self.red.get("systemStatus")
+            if status == "DISCONNECTED":
+                return True, None, None
 
-            # unplugged / disconnected
+            if actual == "ON":
+                return False, actual, "green"
+
+            if actual == "OFF":
+                return False, actual, "red"
+
             is_unplugged = self.red.get("sensor:2:unplugged")
-            curr = self.red.get("systemStatus")
-            if is_unplugged == "true" or (curr is not None):
-                disabled = True
-                actual = None
-            else:
-                disabled = False
+            if is_unplugged:
+                return True, None, None
 
-            return disabled, actual, segment_color
+            return no_update, no_update, no_update
 
         # ==========================================
         #            HANDLE PHYSICAL SWITCH

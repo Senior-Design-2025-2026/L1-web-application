@@ -3,8 +3,8 @@ from dash_iconify import DashIconify
 from dash import Input, Output,  clientside_callback
 
 theme_toggle = dmc.Switch(
-    offLabel=DashIconify(icon="radix-icons:sun", width=15, color=dmc.DEFAULT_THEME["colors"]["yellow"][8]),
-    onLabel=DashIconify(icon="radix-icons:moon", width=15, color=dmc.DEFAULT_THEME["colors"]["yellow"][6]),
+    offLabel=DashIconify(icon="streamline-ultimate:light-mode-bright-dark-bold", width=17, color=dmc.DEFAULT_THEME["colors"]["yellow"][8]),
+    onLabel=DashIconify(icon="streamline-ultimate:light-mode-bright-dark", width=17, color=dmc.DEFAULT_THEME["colors"]["yellow"][6]),
     id="theme",
     persistence=True,
     color="grey",

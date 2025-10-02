@@ -151,6 +151,8 @@ class ThermostatCardAIO(html.Div):
     )
     def update_thermostat_card(segment, checked, unit, data):
 
+        temp = data.get("reading")                                              
+
         if data is None:
             hide_thermo = True
             value = no_update
@@ -160,9 +162,16 @@ class ThermostatCardAIO(html.Div):
             reading = "no data"
             return hide_thermo, value, min, max, scale, reading
 
-        temp = data.get("reading")                                              
+        if temp in ("disconnected", "DISCONNECTED"):
+            hide_thermo = True
+            value = no_update
+            min = no_update
+            max = no_update
+            scale = no_update
+            reading = "N/A"
+            return hide_thermo, value, min, max, scale, reading
 
-        if temp == "unplugged":
+        if temp in ("unplugged", "UNPLUGGED"):
             hide_thermo = True
             value = no_update
             min = no_update
