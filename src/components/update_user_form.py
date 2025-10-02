@@ -9,6 +9,15 @@ import pandas as pd
 # forms are a perfect use case for dash all in one components
 # whoops
 
+def update_user_form_defaults() -> tuple:
+    return (
+        None, 
+        None,
+        None,
+        None,
+        None,
+    )
+
 def get_user_fields(row: pd.DataFrame) -> tuple:
     name       = row.iloc[0]["name"]
     email_addr = row.iloc[0]["email_addr"]
@@ -40,27 +49,24 @@ def update_user_alert_props(alert_type:str) -> tuple:
 def update_user_form():
     # email (this drives the other fields)
     select_email = dmc.Select(
-        id="update-select-email",
+        id="uu-select",
         label="User Email",
         searchable=True,
+        data=[],
+        value="", 
+        clearable=False,
+        allowDeselect=False,
     )
 
     # name
     form_name = dmc.TextInput(
-        id="update-user-name",
+        id="uu-name",
         label="Name",
-    )
-
-    # email
-    form_email = dmc.TextInput(
-        id="update-user-email",
-        label="Email",
-        description="Must be a University of Iowa email (@uiowa.edu)",
     )
 
     # threshold min
     form_min_threshold_c = dmc.NumberInput(
-        id="update-user-min-thresh",
+        id="uu-min-thresh",
         label="Minimum Threshold (°C)",
         min=0,
         max=50,
@@ -69,29 +75,21 @@ def update_user_form():
 
     # threshold max
     form_max_threshold_c = dmc.NumberInput(
-        id="update-user-max-thresh",
+        id="uu-max-thresh",
         label="Maximum Threshold (°C)",
         min=0,
         max=50,
         step=1,
     ) 
 
-    threshold_row = dmc.Group(
-        [
-            form_min_threshold_c, form_max_threshold_c
-        ],
-        align="center",
-        justify="space-between",
-    )
-
     submit_button = dmc.Button(
-        id="update-user-submit",
+        id="uu-submit",
         children=["Submit Changes"],
         color="green"
     )
 
     cancel_button = dmc.Button(
-        id="update-user-cancel",
+        id="uu-cancel",
         children=["Cancel"],
         color="red",
         variant="outline"
@@ -106,49 +104,54 @@ def update_user_form():
         mt="md"
     )
 
-    form = dmc.Stack(
-        [
-            select_email,
-            form_name,
-            form_email,
-            threshold_row,
-            button_row
-        ]
+    confirm_submit_button = dmc.Button(
+        id="uu-submit-confirm",
+        children=["Submit Changes"],
+        color="green"
     )
 
-    title = dmc.Center(
-        [
-            DashIconify(icon="fa7-solid:user-edit", width=30),
-            dmc.Text("update User", fz="h3", ml="md"),
-        ]
+    confirm_cancel_button = dmc.Button(
+        id="uu-cancel-confirm",
+        children=["Cancel"],
+        color="red",
+        variant="outline"
     )
 
-    modal = dmc.ModalStack(
-        id="update-modal-stack",
-        children=[
-            dmc.ManagedModal(
-                id="update-user-modal",
-                title=title,
-                children=[
-                    form
-                ],
-            ),
-            dmc.ManagedModal(
-                id="confirm-update-user",
-                title="Confirm Update",
-                children=[
-                    dmc.Text(id="confirm-update-pending-changes"),
-                    dmc.Group(
-                        children=[
-                            dmc.Button("Confirm", id="confirm-submit-user-update", color="green"),
-                            dmc.Button("Cancel", id="confirm-cancel-user-update", color="red", variant="outline"),
-                        ],
-                        mt="md",
-                        justify="flex-end",
-                    )
-                ]
-            )
-        ]
+    confirm_button_row = dmc.Group(
+        [
+            confirm_submit_button, 
+            confirm_cancel_button
+        ], 
+        justify="flex-end",
+        mt="md"
     )
+
+    modal = dmc.Center([
+        dmc.ModalStack(
+            id="modal-stack",
+            children=[
+                dmc.ManagedModal(
+                    id="uu-form",
+                    title="Update an Existing User",
+                    children=[
+                        select_email,
+                        form_name,
+                        form_min_threshold_c,
+                        form_max_threshold_c,
+                        button_row
+                    ],
+                ),
+                dmc.ManagedModal(
+                    id="uu-confirm",
+                    title="Confirm Update",
+                    children=[
+                        dmc.Text("Are you sure you want to perform this update?"),
+                        confirm_button_row
+                    ],
+                ),
+            ]
+        ),
+    ])
 
     return modal
+

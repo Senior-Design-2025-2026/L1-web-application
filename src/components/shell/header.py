@@ -24,10 +24,10 @@ for key,val in PAGE_LINKS.items():
         dmc.NavLink(
             label=dmc.Text(
                 key, 
-                fz={"base":14, "sm":10, "md":12, "lg":18}
+                fz={"base":18, "sm":14, "md":16, "lg":22}
             ),
             href=href,
-            leftSection=DashIconify(icon=val),
+            leftSection=DashIconify(icon=val, width=20),
         )
     )
 
@@ -77,7 +77,7 @@ def header():
                 [
                     dmc.MenuLabel(
                         "Pages",
-                        fz="md"
+                        fz="lg"
                     ),
                     *page_items,
                 ]

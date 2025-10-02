@@ -31,8 +31,7 @@ class LivePage:
 
         status_badge = dmc.Group(
             [
-                dmc.Text("System Status", fw="700", size="lg"), 
-                dmc.Badge(id="system-status-badge", variant="dot", size="lg")
+                dmc.Badge(id="system-status-badge", variant="dot", size="xl")
             ], 
             grow=True,
             align="center"
@@ -40,7 +39,6 @@ class LivePage:
 
         system_cards = dmc.Stack(
             [
-                status_badge,
                 card_1,
                 card_2
             ],
@@ -51,15 +49,15 @@ class LivePage:
         line_chart = dmc.Card(
             dmc.LineChart(
                 id="readings-chart",
-                h=550,
-                w=900,
+                h=350,
+                w=350,
                 data=[],
                 series=[
                     {"name": "Sensor 1", "color": SENSOR_1_COLOR},
                     {"name": "Sensor 2", "color": SENSOR_2_COLOR},
                 ],
                 dataKey="date",
-                curveType="Linear",
+                curveType="Monotone",
 
                 tickLine="y",
                 gridAxis="x",
@@ -72,6 +70,7 @@ class LivePage:
                 withDots="True",
                 withLegend=True,
                 connectNulls=False,
+                dotProps={"r":2}
             ),
             withBorder=True,
         )
@@ -98,30 +97,27 @@ class LivePage:
             size="md"
         )
 
-        return dmc.Group(
+        return dmc.Stack(
             [
                 dcc.Interval(
                     id="system-clock",
                     interval=500,   
                     n_intervals=0
                 ),
+                status_badge,
                 system_cards,
-                dmc.Stack(
+                dmc.Group(
                     [
-                        dmc.Grid(
-                            children = [
-                                dmc.GridCol(dmc.Box(segment), span=10),
-                                dmc.GridCol(dmc.Box(clear), span=2),
-                            ],
-                            grow=True,
-                            gutter="md"
-                        ),
+                        segment,
+                        clear,
+                    ],
+                ),
 
-                        line_chart,
-                        html.Div(id="empty")
-                    ]
-                )
+                line_chart,
+                html.Div(id="empty")
             ],
+            justify="flex-start",
+            align="center"
         )
 
     def get_segment_color(self, status:str):
@@ -215,6 +211,7 @@ class LivePage:
             Input(ThermostatCardAIO.ids.segmented_control("1"), "value")
         )
         def toggle_sensor_1(n_intervals, wanted):
+            # on / off
             actual = self.red.get("virtual:1:status")
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
                 if wanted != actual:              
@@ -222,8 +219,10 @@ class LivePage:
             
             segment_color = self.get_segment_color(actual)
 
+            # unplugged / disconnected
             is_unplugged = self.red.get("sensor:1:unplugged")
-            if is_unplugged == "true":
+            curr = self.red.get("systemStatus")
+            if is_unplugged == "true" or (curr is not None):
                 disabled = True
                 actual = None
             else:
@@ -239,6 +238,7 @@ class LivePage:
             Input(ThermostatCardAIO.ids.segmented_control("2"), "value")
         )
         def toggle_sensor_2(n_intervals, wanted):
+            # on / off
             actual = self.red.get("virtual:2:status")
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("2"):
 
@@ -247,8 +247,10 @@ class LivePage:
 
             segment_color = self.get_segment_color(actual)
 
+            # unplugged / disconnected
             is_unplugged = self.red.get("sensor:2:unplugged")
-            if is_unplugged == "true":
+            curr = self.red.get("systemStatus")
+            if is_unplugged == "true" or (curr is not None):
                 disabled = True
                 actual = None
             else:

@@ -1,3 +1,4 @@
+from collections import UserString
 from dash import html, Output, Input, callback, ctx, State, no_update
 import redis
 import dash_ag_grid as dag
@@ -10,7 +11,8 @@ import json
 
 from db.db_methods import DB
 from components.new_user_form import new_user_form, new_user_form_defaults, new_user_form_no_updates, new_user_alert_props
-from components.update_user_form import get_no_update_fields, update_user_form, get_user_fields, update_user_alert_props
+from components.update_user_form import get_no_update_fields, update_user_form, get_user_fields, update_user_alert_props, update_user_form_defaults
+
 
 class SettingsPage:
     def __init__(self, app, db: DB, redis, celery):
@@ -31,7 +33,7 @@ class SettingsPage:
         )
 
         update_user_modal_btn = dmc.Button(
-                id="update-user-modal-btn",
+                id="uu-open",
                 children=["Edit User"],
                 leftSection=DashIconify(icon="cuida:edit-outline"),
         )
@@ -49,15 +51,15 @@ class SettingsPage:
         new_user_modal_alert = dmc.Alert(
                 id="new-user-alert",
                 title="New User:",
-                duration=2000,
+                duration=5000,
                 withCloseButton=True,
                 hide=True,
             )
 
         update_user_modal_alert = dmc.Alert(
-                id="update-user-alert",
+                id="uu-alert",
                 title="Update User",
-                duration=2000,
+                duration=5000,
                 withCloseButton=True,
                 hide=True,
             )
@@ -74,6 +76,7 @@ class SettingsPage:
             [
                 new_user_modal_alert,
                 update_user_modal_alert,
+                html.Div(id="load"),
                 dmc.Group(
                     [
                         dmc.Title("Settings"),
@@ -87,6 +90,93 @@ class SettingsPage:
                 update_user_form() # hidden modal
             ]
         )
+
+    def handle_submit(self, email_addr, username, min_thresh, max_thresh, celery_task:str):
+        # 1. check for fields
+        fields = [min_thresh, max_thresh, email_addr, username]
+        fields = [None if f=="" else f for f in fields]
+        if any(f is None for f in fields):
+            error = "e1"
+            success = False
+
+        # 2. check for uiowa email
+        elif not email_addr.endswith("@uiowa.edu"):
+            error = "e2"
+            success = False
+
+        # 3. basic checks passed; check for existence
+        elif celery_task == "add_user":
+            exists = self.DB.does_email_exist(email_addr)
+            if not exists:
+                error = ""
+                success = True
+            else:
+                error = "e3"
+                success = False
+
+        else:
+            error = ""
+            success = True
+
+        # this is VERY poor error handling & NOT prod.
+        self.celery_client.send_task(
+            celery_task, 
+            kwargs={
+                "name":username,
+                "email_addr":email_addr,
+                "min_thresh_c":min_thresh,
+                "max_thresh_c":max_thresh,
+            }
+        )
+
+        return [error, success]
+
+    def update_cache_db(self, email_addr, username, min_thresh, max_thresh, celery_task:str):
+        try:
+            old = json.loads(self.red.get("users_df"))
+            users_df = pd.DataFrame.from_dict(old)
+
+            if celery_task == "add_user":
+                id = users_df["user_id"].max() + 1
+                user = {
+                    "user_id": id,
+                    "name":username,
+                    "email_addr": email_addr,
+                    "min_thresh_c": min_thresh,
+                    "max_thresh_c": max_thresh,
+                }
+                new = pd.concat([users_df, pd.DataFrame([user])], ignore_index=True)
+            else:
+                mask = users_df["email_addr"] == email_addr
+                row = users_df.loc[mask]
+
+                if row.empty:
+                    raise ValueError(f"No user found with email {email_addr}")
+                if len(row) > 1:
+                    raise ValueError(f"Multiple users found with email {email_addr}")
+
+                # extract the index of the single row
+                idx = row.index[0]
+
+                # update that row
+                users_df.at[idx, "name"] = username
+                users_df.at[idx, "min_thresh_c"] = int(min_thresh)
+                users_df.at[idx, "max_thresh_c"] = int(max_thresh)
+
+                new = users_df
+
+            new_min_thresh = new["min_thresh_c"].max()
+            new_max_thresh = new["max_thresh_c"].min()
+
+            print("NEW", new)
+            print("min", new_min_thresh)
+            print("max", new_max_thresh)
+
+            self.red.set("users_df", new.to_json(orient="records"))
+            self.red.set("maxMinThresh", str(new_min_thresh))
+            self.red.set("minMaxThresh", str(new_max_thresh))
+        except Exception as e:
+            print("Error adding to dataframe", e)
 
     def callbacks(self):
 
@@ -129,17 +219,7 @@ class SettingsPage:
             State("new-user-name", "value"),
             prevent_initial_call=True,
         )
-        def new_user_modal(
-            submit, 
-            cancel,
-            open,
-
-            opened,
-            min_thresh,
-            max_thresh,
-            email_addr,
-            username
-        ):
+        def new_user_modal( submit, cancel, open, opened, min_thresh, max_thresh, email_addr, username): 
             trigger = ctx.triggered_id
 
             # open the modal
@@ -149,66 +229,10 @@ class SettingsPage:
             # if user clicks submit button
             if trigger == "new-user-submit":
 
-                # 1. check for fields
-                fields = [min_thresh, max_thresh, email_addr, username]
-                fields = [None if f=="" else f for f in fields]
-                if any(f is None for f in fields):
-                    error = "e1"
-                    success = False
-
-                # 2. check for uiowa email
-                elif not email_addr.endswith("@uiowa.edu"):
-                    error = "e2"
-                    success = False
-
-                # 3. basic checks passed; check for existence
-                else:
-                    exists = self.DB.does_email_exist(email_addr)
-                    if not exists:
-                        self.celery_client.send_task(
-                            "add_user", 
-                            kwargs={
-                                "name":username,
-                                "email_addr":email_addr,
-                                "min_thresh_c":min_thresh,
-                                "max_thresh_c":max_thresh,
-                            }
-                        )
-                        error = ""
-                        success = True
-                    else:
-                        error = "e3"
-                        success = False
+                error, success = self.handle_submit(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="add_user")
 
                 if success:
-                    # append to users df
-                    try:
-                        old = json.loads(self.red.get("users_df"))
-                        users_df = pd.DataFrame.from_dict(old)
-
-                        id = users_df["user_id"].max() + 1
-                        user = {
-                            "user_id": id,
-                            "name":username,
-                            "email_addr": email_addr,
-                            "min_thresh_c": min_thresh,
-                            "max_thresh_c": max_thresh,
-                        }
-                        new = pd.concat([users_df, pd.DataFrame([user])], ignore_index=True)
-
-                        new_min_thresh = new["min_thresh_c"].max()
-                        new_max_thresh = new["max_thresh_c"].min()
-
-                        print("")
-                        print("NEW", new)
-                        print("min", new_min_thresh)
-                        print("max", new_max_thresh)
-
-                        self.red.set("users_df", new.to_json(orient="records"))
-                        self.red.set("maxMinThresh", str(new_min_thresh))
-                        self.red.set("minMaxThresh", str(new_max_thresh))
-                    except Exception as e:
-                        print("Error adding to dataframe", e)
+                    self.update_cache_db(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="add_user")
 
                     return False, *new_user_alert_props("s"), *new_user_form_defaults()
                 else:
@@ -221,100 +245,83 @@ class SettingsPage:
             else:
                 return False, *(True, None, None), *new_user_form_no_updates()
 
-    # ====================================
-    #           UPDATE USER FORM 
-    # ====================================
+        # ====================================
+        #           UPDATE USER FORM 
+        # ====================================
         @callback(
-            # modal state
-            Output("update-modal-stack", "opened"),
-            Output("update-modal-stack", "closeAll"),
+            Output("modal-stack", "open"),
+            Output("modal-stack", "closeAll"),
 
-            # alert props
-            Output("update-user-alert", "hide"),
-            Output("update-user-alert", "color"),
-            Output("update-user-alert", "children"),
+            Output("uu-alert", "hide"),
+            Output("uu-alert", "color"),
+            Output("uu-alert", "children"),
 
-            # output of email selected (load from redis)
-            Output("update-select-email", "value"),
+            Input("uu-submit", "n_clicks"),
+            Input("uu-submit-confirm", "n_clicks"),
+            Input("uu-cancel", "n_clicks"),
+            Input("uu-cancel-confirm", "n_clicks"),
+            Input("uu-open", "n_clicks"),
 
-            # output field states (based on email selected)
-            Output("update-user-min-thresh", "value"),
-            Output("update-user-max-thresh", "value"),
-            Output("update-user-email", "value"),
-            Output("update-user-name", "value"),
-
-            # modal control
-            Input("update-user-submit", "n_clicks"),
-            Input("confirm-submit-user-update", "n_clicks"),
-            Input("update-user-cancel", "n_clicks"),
-            Input("confirm-cancel-user-update", "n_clicks"),
-
-            # open button
-            Input("update-user-modal-btn", "n_clicks"),
-
-            # email dropdown
-            Input("update-select-email", "value"),
-
-            # new field states
-            State("update-user-min-thresh", "value"),
-            State("update-user-max-thresh", "value"),
-            State("update-user-email", "value"),
-            State("update-user-name", "value"),
+            State("uu-select", "value"),
+            State("uu-name", "value"),
+            State("uu-min-thresh", "value"),
+            State("uu-max-thresh", "value"),
             prevent_initial_call=True,
         )
-        def update_user_modal(
-            submit, 
-            confirm, 
-            cancel,
-            cancel_confirm, 
-
-            open,
-
-            update_select_email,
-
-            min_thresh,
-            max_thresh,
-            email_addr,
-            username
-        ):
+        def update_user_modal(s1, s2, c1, c2, open, email_addr, username, min_thresh, max_thresh):
             trigger = ctx.triggered_id
-            if trigger == "update-user-model-btn":
-                print("OPENED")
-                # something with the redis cache
-                # to set default
-                open = "update-user-modal"
-                close_all = False
-                alert_props = update_user_alert_props("")
-                fields = get_no_update_fields()
-                return open, close_all, *alert_props, None, *fields
+            if trigger == "uu-open":
+                return "uu-form", False, *update_user_alert_props(""),
+            if trigger == "uu-submit":
+                return "uu-confirm", False, *update_user_alert_props("")
 
-            if trigger == "update-select-email":
-                print("OPENED")
-                # something with the redis cache
-                # to change the field values
-                open = "update-user-modal"
-                close_all = False
-                alert_props = update_user_alert_props("")
-                fields = get_no_update_fields()
-                return open, close_all, *alert_props, None, *fields
+            if trigger == "uu-submit-confirm":
 
-            if trigger in ("update-user-cancel", "confirm-cancel-user-update"):
-                print("CLOSED")
-                open = None
-                close_all = True
-                alert_props = update_user_alert_props("")
-                fields = get_no_update_fields()
-                return open, close_all, *alert_props, None, *fields
+                error, success = self.handle_submit(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="update_user")
+                if success:
+                    self.update_cache_db(email_addr=email_addr, username=username, min_thresh=min_thresh, max_thresh=max_thresh, celery_task="update_user")
+                    return None, True, *update_user_alert_props("s")
+                else:
+                    return None, True, *update_user_alert_props(error), 
 
-            if trigger == "update-user-submit":
-                print("SUBMITTED")
-                open = None
-                close_all = True
-                alert_props = update_user_alert_props("")
-                fields = get_no_update_fields()
-                return open, close_all, *alert_props, None, *fields
+            if trigger in ("uu-cancel", "uu-cancel-confirm"):
+                return None, True, *update_user_alert_props("")
 
-            else:
-                alert_props = update_user_alert_props("")
-                fields = get_no_update_fields()
-                return no_update, no_update, *alert_props, None, *fields
+        @callback(
+            Output("uu-select", "value"),
+            Output("uu-select", "data"),
+            Input("uu-open", "n_clicks")
+        )
+        def update_email_selections(_):
+            users = json.loads(self.red.get("users_df"))
+            users_df = pd.DataFrame.from_dict(users)
+            emails = users_df["email_addr"].tolist()
+            data = [{"value": e, "label": e} for e in emails]
+            try:
+                val = data[0]
+            except:
+                val = None
+            return val, data
+
+        @callback(
+            Output("uu-name", "value"),
+            Output("uu-min-thresh", "value"),
+            Output("uu-max-thresh", "value"),
+            Input("uu-select", "value"),
+            prevent_initial_call=True,
+        )
+        def populate_row(selected):
+            users = json.loads(self.red.get("users_df"))
+            users_df = pd.DataFrame.from_dict(users)
+            row = users_df[users_df["email_addr"] == selected]
+
+            if row.empty:
+                return no_update, no_update, no_update
+
+            user = row.iloc[0]
+
+            name = user["name"]
+            min_thresh = int(user["min_thresh_c"])
+            max_thresh = int(user["max_thresh_c"])
+
+            return name, min_thresh, max_thresh

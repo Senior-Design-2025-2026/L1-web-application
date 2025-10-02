@@ -80,13 +80,6 @@ def new_user_form():
         step=1,
     ) 
 
-    threshold_row = dmc.Group(
-        [
-            form_min_threshold_c, form_max_threshold_c
-        ],
-        align="center",
-        justify="space-between",
-    )
 
     submit_button = dmc.Button(
         id="new-user-submit",
@@ -114,20 +107,14 @@ def new_user_form():
         [
             form_name,
             form_email,
-            threshold_row,
+            form_min_threshold_c,
+            form_max_threshold_c,
             button_row
         ]
     )
 
-    title = dmc.Center(
-        [
-            DashIconify(icon="ri:user-add-fill", width=30),
-            dmc.Text("New User", fz="h3", ml="md"),
-        ]
-    )
-
     modal = dmc.Modal(
-        title=title,
+        title="Create a New User",
         id="new-user-modal",
         children=[
             form        
