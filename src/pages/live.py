@@ -34,7 +34,7 @@ class LivePage:
                 dmc.Text("System Status", fw="700", size="lg"), 
                 dmc.Badge(id="system-status-badge", variant="dot", size="lg")
             ], 
-            justify="space-between",
+            grow=True,
             align="center"
         )
 
@@ -183,11 +183,11 @@ class LivePage:
             # hacky, but works - was having troubles adding an instance of the redis stream into the AIO component.
             # using client-side cache to trigger the updates. Works out nicely as the completion of this callback
             # will ultimately trigger the AIO callbacks simulatneously. 
-            status_1 = self.red.get("virtual:1:status")
-            status_2 = self.red.get("virtual:2:status")
+            is_unplugged_1 = self.red.get("sensor:1:unplugged")
+            is_unplugged_2 = self.red.get("sensor:2:unplugged")
 
-            sensor_1_temp = "UNPLUGGED" if status_1 == "UNPLUGGED" else sensor_1_temp
-            sensor_2_temp = "UNPLUGGED" if status_2 == "UNPLUGGED" else sensor_2_temp
+            sensor_1_temp = "unplugged" if is_unplugged_1 == "true" else sensor_1_temp
+            sensor_2_temp = "unplugged" if is_unplugged_1 == "true" else sensor_2_temp
 
             thermostat_card_1 = {"val": str(sensor_1_temp)}
             thermostat_card_2 = {"val": str(sensor_2_temp)}
@@ -229,7 +229,8 @@ class LivePage:
             
             segment_color = self.get_segment_color(actual)
 
-            if actual == "UNPLUGGED":
+            is_unplugged = self.red.get("sensor:1:unplugged")
+            if is_unplugged == "true":
                 disabled = True
                 actual = None
             else:
@@ -253,7 +254,8 @@ class LivePage:
 
             segment_color = self.get_segment_color(actual)
 
-            if actual == "UNPLUGGED":
+            is_unplugged = self.red.get("sensor:2:unplugged")
+            if is_unplugged == "true":
                 disabled = True
                 actual = None
             else:
