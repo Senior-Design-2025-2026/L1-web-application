@@ -187,10 +187,10 @@ class LivePage:
             is_unplugged_2 = self.red.get("sensor:2:unplugged")
 
             sensor_1_temp = "unplugged" if is_unplugged_1 == "true" else sensor_1_temp
-            sensor_2_temp = "unplugged" if is_unplugged_1 == "true" else sensor_2_temp
+            sensor_2_temp = "unplugged" if is_unplugged_2 == "true" else sensor_2_temp
 
-            thermostat_card_1 = {"val": str(sensor_1_temp)}
-            thermostat_card_2 = {"val": str(sensor_2_temp)}
+            thermostat_card_1 = {"reading": str(sensor_1_temp)}
+            thermostat_card_2 = {"reading": str(sensor_2_temp)}
 
             # range of chart
             yAxisProps = {"domain":range_y}
@@ -208,12 +208,8 @@ class LivePage:
             return [""]
 
         # ==========================================
-        #            HANDLE SENSOR TOGGLES
+        #              VIRTUALIZATION 
         # ==========================================
-        # these poll the status of the physical system to detect if on / off / unplugged
-        # if clicked, it updates the redis status which is read when data comes in
-        # if the status has changed, then the http response to the embedded device says
-        # to toggle the button.
         @callback(
             Output(ThermostatCardAIO.ids.segmented_control("1"), "disabled"),
             Output(ThermostatCardAIO.ids.segmented_control("1"), "value"),

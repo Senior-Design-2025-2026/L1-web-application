@@ -1,5 +1,5 @@
 import dash_mantine_components as dmc
-from dash import Dash, Output, Input, State, html, dcc, callback, MATCH, ctx
+from dash import Dash, Output, Input, State, html, dcc, callback, MATCH, ctx, no_update
 import dash_daq as daq
 from dash_iconify import DashIconify
 from utils.temperature_utils import c_to_f, c_to_k
@@ -150,66 +150,62 @@ class ThermostatCardAIO(html.Div):
         ]
     )
     def update_thermostat_card(segment, checked, unit, data):
-        temp = data.get("val")                                              # data is passed as a string...
+        print("-- --")
+        print("DATA", data)
+        print("temp", data.get("reading"))
 
-        if data is None or temp in (None, "None", "UNPLUGGED"):
-            missing = True
-        else:
-            temp = temp
-            missing = False
+        if data is None:
+            hide_thermo = True
+            value = no_update
+            min = no_update
+            max = no_update
+            scale = no_update
+            reading = "no data"
+            return hide_thermo, value, min, max, scale, reading
 
+        temp = data.get("reading")                                              
+
+        if temp == "unplugged":
+            hide_thermo = True
+            value = no_update
+            min = no_update
+            max = no_update
+            scale = no_update
+            reading = "Sensor Unplugged"
+            return hide_thermo, value, min, max, scale, reading
+
+        if temp in [None, "None"]:
+            hide_thermo = True
+            value = no_update
+            min = no_update
+            max = no_update
+            scale = no_update
+            reading = "Sensor Off"
+            return hide_thermo, value, min, max, scale, reading
+
+        # display thermometer
+        hide_thermo = False
 
         if unit == "f":
             range = RANGE_F
+            temp = c_to_f(temp)
         else:
             range = RANGE_C
 
-        thermometer_min = range[0]
-        thermometer_max = range[-1]
+        min = range[0]
+        max = range[-1]
         
-        scale_color = "#C9C9C9" if checked else "#454545"   
-        thermometer_scale = {
+        color = "#C9C9C9" if checked else "#454545"   
+        scale = {
             "custom": {
-                val: {"label": str(val), "style": {"color": scale_color}}
+                val: {"label": str(val), "style": {"color": color}}
                 for val in range
             }
         }
 
-        # SENSOR ON
-        if segment == "ON":
-            hidden = False
+        unit = f" °{unit.upper()}"
 
-            # IF ON, but no reading: display N/A
-            if missing:
-                hidden = True
-                reading = "Loading..."
-            else:
-                temp = float(temp)
-                if unit == "f":
-                    temp = c_to_f(temp)
-                    unit = f" °{unit.upper()}"
-                elif unit == "k":
-                    temp = c_to_k(temp)
-                    unit = "K"
-                else:
-                    unit = f" °{unit.upper()}"
-
-                reading = f"{temp:.2f}{unit}"
-
-        # SENSOR OFF
-        else:
-            hidden = True
-            if data == "unplugged":
-                reading = "Sensor Unplugged"
-            else:
-                reading = "Sensor Off"
-
-        return (
-            hidden,                     # hidden
-            temp,                       # value
-            thermometer_min,            # min
-            thermometer_max,            # max
-            thermometer_scale,          # scale
-
-            reading,                    # children
-        )
+        value = float(temp)
+        reading = f"{value:.2f}{unit}"
+        
+        return hide_thermo, value, min, max, scale, reading
