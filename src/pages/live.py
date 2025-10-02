@@ -25,7 +25,6 @@ class LivePage:
             self.callbacks()
 
     def layout(self):
-        self.red.set("button_1_status", "ON")
         card_1 = ThermostatCardAIO("Sensor 1", aio_id="1", color=SENSOR_1_COLOR)
         card_2 = ThermostatCardAIO("Sensor 2", aio_id="2", color=SENSOR_2_COLOR)
 
@@ -216,6 +215,7 @@ class LivePage:
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("1"):
                 if wanted != actual:              
                     self.red.set("virtual:1:wants_toggle", "true")
+                    return no_update, no_update, no_update
 
             # device status
             status = self.red.get("systemStatus")
@@ -229,7 +229,7 @@ class LivePage:
                 return False, actual, "red"
 
             is_unplugged = self.red.get("sensor:1:unplugged")
-            if is_unplugged:
+            if is_unplugged == "true":
                 return True, None, None
 
             return no_update, no_update, no_update
@@ -247,6 +247,7 @@ class LivePage:
             if ctx.triggered_id == ThermostatCardAIO.ids.segmented_control("2"):
                 if wanted != actual:              
                     self.red.set("virtual:2:wants_toggle", "true")
+                    return no_update, no_update, no_update
 
             # device status
             status = self.red.get("systemStatus")
@@ -260,10 +261,8 @@ class LivePage:
                 return False, actual, "red"
 
             is_unplugged = self.red.get("sensor:2:unplugged")
-            if is_unplugged:
+            if is_unplugged == "true":
                 return True, None, None
-
-            return no_update, no_update, no_update
 
         # ==========================================
         #            HANDLE PHYSICAL SWITCH
