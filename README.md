@@ -2,49 +2,15 @@
 Plotly Dash Web-Server Responsible for displaying the temperature readings visually.
 
 <div align="center">
-
-![alt text](img/project_diagram.png)
-<br>
-<span style="display:block; text-align:center; font-style:italic;">Project Diagram</span>
+  <img src="img/project_diagram.png" alt="System Architecture" width="800">
+  <div><em>System Architecture</em></div>
+   <br>
 </div>
 
 <div align="center">
-
-![alt text](img/sqlite_schemas.png)
-<br>
-<span style="display:block; text-align:center; font-style:italic;">Sqlite Schemas</span>
+  <img src="img/image.png" alt="System Architecture" width="800">
+  <div><em>Dashboard</em></div>
 </div>
-
-## Data Sharing and Storage
-
-Dash is session-based per client, which makes viewing and modifying the system between multiple users troublesome.  
-We want the status and stream of data to be identical across clients. For example, if client 'A' turns sensor 1 on, this is reflected in client 'B's view.
-
-To achieve performance and persistence, we employ the following architecture:
-
-### 1. Global State: Redis
-**Purpose:** Shared, real-time state across all clients  
-**Stored globally:**
-- Sensor 1 status
-- Sensor 2 status
-- Streaming data
-
-### 2. Session State: `dcc.Store` (Client-side Browser Cache)
-**Purpose:** Per-user session state for UI selections  
-**Cached locally:**
-- Temperature unit selection
-- Timeframe selection
-
-### 3. Persistent Storage: SQLite Database
-**Purpose:** Long-term, reliable data storage  
-**Persisted:**
-- Streaming data (written by the embedded program)
-- temperature_readings: read-only
-- user: R/W
-
----
-
-## Project Setup
 
 ### Setting up the Project
 
@@ -62,23 +28,4 @@ Using [UV](https://docs.astral.sh/uv/) as the package manager (≤10x faster tha
 4. Run the application:
    ```sh
    uv run app/app.py
-   ```
-
----
-
-## Running Ruff
-
-Optional code quality check using [Ruff](https://docs.astral.sh/ruff/):
-
-1. Install `ruff`:
-   ```sh
-   uv add --dev ruff
-   ```
-2. Check for syntax issues:
-   ```sh
-   uv run ruff check
-   ```
-3. Automatically fix issues:
-   ```sh
-   uv ruff check --fix
    ```
