@@ -2,7 +2,7 @@
 Plotly Dash Web-Server Responsible for displaying the temperature readings visually.
 
 <div align="center">
-  <img src="img/project_diagram.png" alt="System Architecture" width="800">
+  <img src="img/arch.png" alt="System Architecture" width="800">
   <div><em>System Architecture</em></div>
    <br>
 </div>
